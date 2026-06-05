@@ -5,6 +5,23 @@
 
 import { Platform } from 'react-native';
 
+export const AppColors = {
+  primary: '#848d7d',       // sage green (splash bg, headers)
+  primaryDark: '#3C4A3E',   // dark green (buttons, accents)
+  primaryLight: '#A8B09F',  // lighter sage
+  background: '#F5F0EB',    // warm cream/beige (main bg)
+  cardBackground: '#EDE8E1', // slightly darker cream for cards
+  surface: '#FFFFFF',
+  text: '#2C2C2C',
+  textSecondary: '#6B6B6B',
+  textLight: '#FFFFFF',
+  border: '#D4CFC8',
+  accent: '#B8A88A',        // warm tan accent
+  error: '#D32F2F',
+  success: '#4CAF50',
+  headerBg: '#3C4A3E',      // dark green header
+};
+
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
