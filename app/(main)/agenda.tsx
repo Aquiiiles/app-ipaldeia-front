@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { AppColors } from '@/constants/theme';
+import { scale } from '@/constants/responsive';
 
 type TabKey = 'geral' | 'aniversariantes';
 
@@ -34,9 +35,10 @@ export default function AgendaScreen() {
   const renderItem = ({ item, index }: { item: AgendaItem; index: number }) => (
     <View>
       <View style={styles.row}>
-        <Text style={styles.date}>{item.date}</Text>
+        <View style={styles.dateBox}>
+          <Text style={styles.date}>{item.date}</Text>
+        </View>
         <View style={styles.labelContainer}>
-          <Text style={styles.dash}>-</Text>
           <Text style={styles.label}>{item.label}</Text>
         </View>
       </View>
@@ -85,22 +87,22 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 8,
-    gap: 12,
+    paddingHorizontal: scale(16),
+    paddingTop: scale(12),
+    paddingBottom: scale(6),
+    gap: scale(8),
   },
   tab: {
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    borderRadius: 24,
+    paddingVertical: scale(8),
+    paddingHorizontal: scale(18),
+    borderRadius: scale(20),
     backgroundColor: AppColors.cardBackground,
   },
   tabActive: {
     backgroundColor: AppColors.primaryDark,
   },
   tabText: {
-    fontSize: 15,
+    fontSize: scale(13),
     fontWeight: '600',
     color: AppColors.textSecondary,
   },
@@ -108,37 +110,36 @@ const styles = StyleSheet.create({
     color: AppColors.textLight,
   },
   listContent: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(8),
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: scale(12),
+  },
+  dateBox: {
+    backgroundColor: AppColors.primaryDark,
+    borderRadius: scale(10),
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(8),
+    minWidth: scale(64),
+    alignItems: 'center',
+    marginRight: scale(14),
   },
   date: {
-    fontSize: 42,
+    fontSize: scale(16),
     fontWeight: '700',
-    color: AppColors.primaryDark,
-    minWidth: 110,
+    color: AppColors.textLight,
   },
   labelContainer: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dash: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: AppColors.text,
-    marginRight: 8,
   },
   label: {
-    fontSize: 16,
+    fontSize: scale(14),
     fontWeight: '600',
     color: AppColors.text,
-    letterSpacing: 0.5,
-    flexShrink: 1,
+    letterSpacing: 0.3,
   },
   divider: {
     height: 1,

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
+import { scale } from '@/constants/responsive';
 
 const SAMPLE_SERMONS = [
   { id: '1', title: 'Culto Dominical - 15/12' },
@@ -20,11 +22,13 @@ export default function SermonsScreen() {
       </TouchableOpacity>
 
       <View style={styles.filterRow}>
-        <TouchableOpacity style={styles.filterButton}>
+        <TouchableOpacity style={styles.filterButton} activeOpacity={0.7}>
           <Text style={styles.filterText}>{selectedMonth}</Text>
+          <Ionicons name="chevron-down" size={scale(13)} color={AppColors.textLight} style={{ marginLeft: scale(4) }} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.filterButton}>
+        <TouchableOpacity style={styles.filterButton} activeOpacity={0.7}>
           <Text style={styles.filterText}>{selectedYear}</Text>
+          <Ionicons name="chevron-down" size={scale(13)} color={AppColors.textLight} style={{ marginLeft: scale(4) }} />
         </TouchableOpacity>
       </View>
 
@@ -35,7 +39,9 @@ export default function SermonsScreen() {
       >
         {SAMPLE_SERMONS.map((sermon) => (
           <TouchableOpacity key={sermon.id} style={styles.card} activeOpacity={0.7}>
-            <View style={styles.cardImage} />
+            <View style={styles.cardImage}>
+              <Ionicons name="play-circle-outline" size={scale(32)} color="rgba(255,255,255,0.8)" />
+            </View>
             <View style={styles.cardInfo}>
               <Text style={styles.cardTitle}>{sermon.title}</Text>
             </View>
@@ -56,65 +62,74 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: AppColors.primaryDark,
-    marginHorizontal: 20,
-    marginTop: 20,
-    paddingVertical: 16,
-    borderRadius: 12,
-    gap: 10,
+    marginHorizontal: scale(16),
+    marginTop: scale(14),
+    paddingVertical: scale(12),
+    borderRadius: scale(10),
+    gap: scale(8),
   },
   liveDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: scale(8),
+    height: scale(8),
+    borderRadius: scale(4),
     backgroundColor: '#E53935',
   },
   liveText: {
     color: AppColors.textLight,
-    fontSize: 18,
+    fontSize: scale(14),
     fontWeight: '700',
     letterSpacing: 1,
   },
   filterRow: {
     flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 8,
+    gap: scale(8),
+    paddingHorizontal: scale(16),
+    paddingTop: scale(12),
+    paddingBottom: scale(6),
   },
   filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: AppColors.primaryDark,
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    borderRadius: 24,
+    paddingVertical: scale(8),
+    paddingHorizontal: scale(14),
+    borderRadius: scale(20),
   },
   filterText: {
     color: AppColors.textLight,
-    fontSize: 15,
+    fontSize: scale(13),
     fontWeight: '600',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 40,
-    gap: 16,
+    paddingHorizontal: scale(16),
+    paddingTop: scale(8),
+    paddingBottom: scale(32),
+    gap: scale(12),
   },
   card: {
     backgroundColor: AppColors.cardBackground,
-    borderRadius: 12,
+    borderRadius: scale(12),
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
   },
   cardImage: {
-    height: 160,
+    height: scale(120),
     backgroundColor: AppColors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardInfo: {
-    padding: 14,
+    padding: scale(12),
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: scale(14),
     fontWeight: '600',
     color: AppColors.text,
   },

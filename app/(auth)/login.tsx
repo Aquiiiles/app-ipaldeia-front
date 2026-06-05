@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { auth } from '../../src/services/firebase';
 import logoIgreja from '../../assets/images_igreja/logo_igreja.jpg';
+import { scale, wp } from '@/constants/responsive';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -92,7 +93,6 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.container}>
-          {/* Logo */}
           <View style={styles.logoContainer}>
             <Image
               source={logoIgreja}
@@ -101,19 +101,17 @@ export default function LoginScreen() {
             />
           </View>
 
-          {/* Welcome Text */}
           <Text style={styles.title}>Bem-Vindo!</Text>
           <Text style={styles.subtitle}>
             Tenha acesso a conteúdos e recursos que facilitam seu dia a dia com
             a igreja
           </Text>
 
-          {/* Form */}
           <View style={styles.form}>
             <View style={styles.inputWrapper}>
               <Ionicons
                 name="mail-outline"
-                size={20}
+                size={scale(18)}
                 color="#6B6B6B"
                 style={styles.inputIcon}
               />
@@ -132,7 +130,7 @@ export default function LoginScreen() {
             <View style={styles.inputWrapper}>
               <Ionicons
                 name="lock-closed-outline"
-                size={20}
+                size={scale(18)}
                 color="#6B6B6B"
                 style={styles.inputIcon}
               />
@@ -151,7 +149,7 @@ export default function LoginScreen() {
               >
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                  size={20}
+                  size={scale(18)}
                   color="#6B6B6B"
                 />
               </TouchableOpacity>
@@ -164,7 +162,6 @@ export default function LoginScreen() {
               <Text style={styles.forgotPasswordText}>Esqueci a senha</Text>
             </TouchableOpacity>
 
-            {/* Login Button */}
             <TouchableOpacity
               style={[styles.button, styles.primaryButton]}
               onPress={handleLogin}
@@ -178,14 +175,12 @@ export default function LoginScreen() {
               )}
             </TouchableOpacity>
 
-            {/* Divider */}
             <View style={styles.divider}>
               <View style={styles.dividerLine} />
               <Text style={styles.dividerText}>ou</Text>
               <View style={styles.dividerLine} />
             </View>
 
-            {/* Social Buttons */}
             <TouchableOpacity
               style={[styles.button, styles.socialButton]}
               onPress={handleGmailLogin}
@@ -193,7 +188,7 @@ export default function LoginScreen() {
             >
               <Ionicons
                 name="logo-google"
-                size={20}
+                size={scale(17)}
                 color="#3C4A3E"
                 style={styles.socialIcon}
               />
@@ -207,14 +202,13 @@ export default function LoginScreen() {
             >
               <Ionicons
                 name="logo-facebook"
-                size={20}
+                size={scale(17)}
                 color="#3C4A3E"
                 style={styles.socialIcon}
               />
               <Text style={styles.socialButtonText}>ENTRAR COM FACEBOOK</Text>
             </TouchableOpacity>
 
-            {/* Register Link */}
             <View style={styles.registerLinkContainer}>
               <Text style={styles.registerLinkText}>Não tem uma conta? </Text>
               <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
@@ -235,40 +229,42 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    justifyContent: 'center',
   },
   container: {
-    flex: 1,
-    paddingHorizontal: 32,
-    paddingTop: 60,
-    paddingBottom: 40,
+    paddingHorizontal: wp(7),
+    paddingVertical: scale(24),
     alignItems: 'center',
+    maxWidth: 480,
+    alignSelf: 'center',
+    width: '100%',
   },
   logoContainer: {
-    marginBottom: 24,
+    marginBottom: scale(16),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 5,
   },
   logo: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: scale(88),
+    height: scale(88),
+    borderRadius: scale(44),
   },
   title: {
-    fontSize: 28,
+    fontSize: scale(24),
     fontWeight: '700',
     color: '#2C2C2C',
-    marginBottom: 8,
+    marginBottom: scale(6),
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: scale(13),
     color: '#6B6B6B',
     textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 32,
-    paddingHorizontal: 16,
+    lineHeight: scale(18),
+    marginBottom: scale(24),
+    paddingHorizontal: scale(8),
   },
   form: {
     width: '100%',
@@ -279,54 +275,54 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#D4CFC8',
-    borderRadius: 12,
-    marginBottom: 14,
-    paddingHorizontal: 14,
-    height: 52,
+    borderRadius: scale(10),
+    marginBottom: scale(10),
+    paddingHorizontal: scale(12),
+    height: scale(46),
   },
   inputIcon: {
-    marginRight: 10,
+    marginRight: scale(8),
   },
   input: {
     flex: 1,
-    fontSize: 15,
+    fontSize: scale(14),
     color: '#2C2C2C',
     height: '100%',
   },
   eyeButton: {
-    padding: 4,
+    padding: scale(4),
   },
   forgotPassword: {
     alignSelf: 'flex-end',
-    marginBottom: 24,
+    marginBottom: scale(18),
   },
   forgotPasswordText: {
-    fontSize: 13,
+    fontSize: scale(12),
     color: '#6B6B6B',
     textDecorationLine: 'underline',
   },
   button: {
     width: '100%',
-    height: 52,
-    borderRadius: 12,
+    height: scale(44),
+    borderRadius: scale(10),
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
   },
   primaryButton: {
     backgroundColor: '#3C4A3E',
-    marginBottom: 20,
+    marginBottom: scale(16),
   },
   primaryButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: scale(14),
     fontWeight: '700',
     letterSpacing: 1,
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: scale(16),
   },
   dividerLine: {
     flex: 1,
@@ -334,22 +330,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#D4CFC8',
   },
   dividerText: {
-    marginHorizontal: 16,
-    fontSize: 13,
+    marginHorizontal: scale(12),
+    fontSize: scale(12),
     color: '#9E9E9E',
   },
   socialButton: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#D4CFC8',
-    marginBottom: 12,
+    marginBottom: scale(10),
   },
   socialIcon: {
-    marginRight: 10,
+    marginRight: scale(8),
   },
   socialButtonText: {
     color: '#3C4A3E',
-    fontSize: 14,
+    fontSize: scale(13),
     fontWeight: '600',
     letterSpacing: 0.5,
   },
@@ -357,14 +353,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: scale(8),
   },
   registerLinkText: {
-    fontSize: 14,
+    fontSize: scale(13),
     color: '#6B6B6B',
   },
   registerLinkAction: {
-    fontSize: 14,
+    fontSize: scale(13),
     fontWeight: '700',
     color: '#3C4A3E',
     textDecorationLine: 'underline',

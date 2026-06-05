@@ -3,6 +3,7 @@ import { View, Image, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 
 import logoIgreja from '../../assets/images_igreja/logo_igreja.jpg';
+import { scale } from '@/constants/responsive';
 
 export default function SplashScreen() {
   useEffect(() => {
@@ -27,8 +28,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
+    width: scale(160),
+    height: scale(160),
+    borderRadius: scale(80),
   },
 });

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
+import { scale } from '@/constants/responsive';
 
 const SAMPLE_TEXT = `No princípio, criou Deus os céus e a terra. A terra, porém, estava sem forma e vazia; havia trevas sobre a face do abismo, e o Espírito de Deus pairava por sobre as águas.
 
@@ -15,11 +17,14 @@ export default function BibleScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.selectorRow}>
-        <TouchableOpacity style={styles.selectorButton}>
+        <TouchableOpacity style={styles.selectorButton} activeOpacity={0.7}>
+          <Ionicons name="book-outline" size={scale(14)} color={AppColors.textLight} style={{ marginRight: scale(6) }} />
           <Text style={styles.selectorText}>{selectedBook}</Text>
+          <Ionicons name="chevron-down" size={scale(14)} color={AppColors.textLight} style={{ marginLeft: scale(4) }} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.selectorButton}>
+        <TouchableOpacity style={styles.selectorButton} activeOpacity={0.7}>
           <Text style={styles.selectorText}>Cap {selectedChapter}</Text>
+          <Ionicons name="chevron-down" size={scale(14)} color={AppColors.textLight} style={{ marginLeft: scale(4) }} />
         </TouchableOpacity>
       </View>
 
@@ -41,33 +46,35 @@ const styles = StyleSheet.create({
   },
   selectorRow: {
     flexDirection: 'row',
-    gap: 12,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 12,
+    gap: scale(8),
+    paddingHorizontal: scale(16),
+    paddingTop: scale(14),
+    paddingBottom: scale(8),
   },
   selectorButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: AppColors.primaryDark,
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    borderRadius: 24,
+    paddingVertical: scale(8),
+    paddingHorizontal: scale(14),
+    borderRadius: scale(20),
   },
   selectorText: {
     color: AppColors.textLight,
-    fontSize: 15,
+    fontSize: scale(13),
     fontWeight: '600',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 40,
+    paddingHorizontal: scale(16),
+    paddingTop: scale(8),
+    paddingBottom: scale(32),
   },
   bibleText: {
-    fontSize: 17,
-    lineHeight: 28,
+    fontSize: scale(15),
+    lineHeight: scale(24),
     color: AppColors.text,
   },
 });

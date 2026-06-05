@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,63 +8,103 @@ import {
   ScrollView,
   Image,
 } from 'react-native';
+import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { signOut } from 'firebase/auth';
 import { AppColors } from '@/constants/theme';
+import { scale } from '@/constants/responsive';
+import { auth } from '../../src/services/firebase';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
-const MENU_ITEMS: { label: string; icon: IoniconsName }[] = [
-  { label: 'Login', icon: 'person-outline' },
+const MENU_ITEMS: { label: string; icon: IoniconsName; action?: string }[] = [
   { label: 'Minha conta', icon: 'settings-outline' },
   { label: 'Download', icon: 'download-outline' },
   { label: 'Indicar amigo', icon: 'share-social-outline' },
   { label: 'Fale conosco', icon: 'chatbubble-outline' },
+  { label: 'Sair', icon: 'log-out-outline', action: 'logout' },
 ];
 
 export default function ProfileScreen() {
-  const handlePress = () => {
+  const [userName, setUserName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (user) {
+      setUserName(user.displayName || '');
+      setUserEmail(user.email || '');
+    }
+  }, []);
+
+  const handlePress = (action?: string) => {
+    if (action === 'logout') {
+      Alert.alert('Sair', 'Deseja realmente sair?', [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Sair',
+          style: 'destructive',
+          onPress: async () => {
+            await signOut(auth);
+            router.replace('/(auth)/login');
+          },
+        },
+      ]);
+      return;
+    }
     Alert.alert('Em breve!');
   };
+
+  const initials = userName
+    ? userName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase()
+    : '?';
 
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
     >
-      {/* Header */}
       <View style={styles.header}>
         <View style={styles.avatarCircle}>
-          <Text style={styles.avatarText}>Sua foto</Text>
+          <Text style={styles.avatarText}>{initials}</Text>
         </View>
+        {userName ? <Text style={styles.userName}>{userName}</Text> : null}
+        {userEmail ? <Text style={styles.userEmail}>{userEmail}</Text> : null}
         <View style={styles.badge}>
           <Text style={styles.badgeText}>Membro</Text>
         </View>
       </View>
 
-      {/* Menu items */}
       <View style={styles.menuContainer}>
         {MENU_ITEMS.map((item, index) => (
           <View key={item.label}>
             {index > 0 && <View style={styles.divider} />}
-            <TouchableOpacity style={styles.menuItem} onPress={handlePress}>
-              <Ionicons
-                name={item.icon}
-                size={24}
-                color={AppColors.text}
-                style={styles.menuIcon}
-              />
-              <Text style={styles.menuLabel}>{item.label}</Text>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => handlePress(item.action)}
+              activeOpacity={0.6}
+            >
+              <View style={styles.menuIconContainer}>
+                <Ionicons
+                  name={item.icon}
+                  size={scale(20)}
+                  color={item.action === 'logout' ? AppColors.error : AppColors.primaryDark}
+                />
+              </View>
+              <Text style={[
+                styles.menuLabel,
+                item.action === 'logout' && { color: AppColors.error },
+              ]}>{item.label}</Text>
               <Ionicons
                 name="chevron-forward"
-                size={20}
-                color={AppColors.textSecondary}
+                size={scale(16)}
+                color={AppColors.border}
               />
             </TouchableOpacity>
           </View>
         ))}
       </View>
 
-      {/* Footer logo */}
       <View style={styles.footerLogo}>
         <Image
           source={require('@/assets/images/icon.png')}
@@ -86,64 +127,82 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: AppColors.headerBg,
     alignItems: 'center',
-    paddingTop: 48,
-    paddingBottom: 32,
+    paddingTop: scale(32),
+    paddingBottom: scale(24),
   },
   avatarCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: scale(72),
+    height: scale(72),
+    borderRadius: scale(36),
     backgroundColor: AppColors.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: scale(10),
   },
   avatarText: {
-    fontSize: 14,
+    fontSize: scale(22),
     color: AppColors.textLight,
-    fontWeight: '500',
+    fontWeight: '700',
+  },
+  userName: {
+    fontSize: scale(16),
+    fontWeight: '700',
+    color: AppColors.textLight,
+    marginBottom: scale(2),
+  },
+  userEmail: {
+    fontSize: scale(12),
+    color: 'rgba(255,255,255,0.7)',
+    marginBottom: scale(10),
   },
   badge: {
     backgroundColor: AppColors.accent,
-    borderRadius: 16,
-    paddingHorizontal: 20,
-    paddingVertical: 6,
+    borderRadius: scale(12),
+    paddingHorizontal: scale(14),
+    paddingVertical: scale(4),
   },
   badgeText: {
     color: AppColors.textLight,
-    fontSize: 14,
+    fontSize: scale(12),
     fontWeight: '600',
   },
   menuContainer: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
+    paddingHorizontal: scale(16),
+    paddingTop: scale(8),
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 18,
+    paddingVertical: scale(14),
   },
-  menuIcon: {
-    marginRight: 16,
+  menuIconContainer: {
+    width: scale(36),
+    height: scale(36),
+    borderRadius: scale(18),
+    backgroundColor: 'rgba(60, 74, 62, 0.07)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: scale(12),
   },
   menuLabel: {
     flex: 1,
-    fontSize: 16,
+    fontSize: scale(14),
     color: AppColors.text,
     fontWeight: '500',
   },
   divider: {
     height: 1,
     backgroundColor: AppColors.border,
+    marginLeft: scale(48),
   },
   footerLogo: {
     alignItems: 'center',
     marginTop: 'auto' as any,
-    paddingVertical: 32,
+    paddingVertical: scale(24),
   },
   logo: {
-    width: 64,
-    height: 64,
-    opacity: 0.5,
+    width: scale(48),
+    height: scale(48),
+    opacity: 0.4,
   },
 });
