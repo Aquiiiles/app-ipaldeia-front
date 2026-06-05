@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { signOut, updateProfile } from 'firebase/auth';
 import { AppColors } from '@/constants/theme';
 import { auth } from '../../src/services/firebase';
+import { isAdmin } from '@/src/services/admin';
 import Toast from '@/components/Toast';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
@@ -45,6 +46,7 @@ export default function ProfileScreen() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [editName, setEditName] = useState('');
   const [saving, setSaving] = useState(false);
+  const [admin, setAdmin] = useState(false);
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' | 'warning' });
 
   function showToast(message: string, type: 'success' | 'error' | 'warning' = 'success') {
@@ -62,6 +64,7 @@ export default function ProfileScreen() {
       setUserEmail(user.email || '');
       setUserPhoto(user.photoURL);
     }
+    setAdmin(isAdmin());
   }, []);
 
   function handlePress(action: string) {
@@ -144,7 +147,7 @@ export default function ProfileScreen() {
         <Text style={styles.userName}>{userName || 'Seu nome'}</Text>
         <Text style={styles.userEmail}>{userEmail}</Text>
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>Membro</Text>
+          <Text style={styles.badgeText}>{admin ? 'Admin' : 'Membro'}</Text>
         </View>
       </View>
 
