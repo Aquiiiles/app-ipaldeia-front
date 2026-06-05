@@ -1,15 +1,15 @@
 import { useEffect } from 'react';
-import { View, Image, StyleSheet } from 'react-native';
+import { View, Image, StyleSheet, Platform } from 'react-native';
 import { router } from 'expo-router';
 
 import logoIgreja from '../../assets/images_igreja/logo_igreja.jpg';
-import { scale } from '@/constants/responsive';
 
 export default function SplashScreen() {
   useEffect(() => {
+    const delay = Platform.OS === 'web' ? 1000 : 2500;
     const timer = setTimeout(() => {
       router.replace('/(auth)/login');
-    }, 2500);
+    }, delay);
     return () => clearTimeout(timer);
   }, []);
 
@@ -28,8 +28,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: scale(160),
-    height: scale(160),
-    borderRadius: scale(80),
+    width: 160,
+    height: 160,
+    borderRadius: 80,
   },
 });
