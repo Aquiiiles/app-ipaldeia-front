@@ -7,9 +7,7 @@ import {
   Image,
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
-import { scale } from '@/constants/responsive';
 import { useState } from 'react';
 
 const PIX_KEY = '12.345.678/0001-90';
@@ -33,50 +31,35 @@ export default function DonationsScreen() {
         onPress={handleCopyPix}
         activeOpacity={0.8}
       >
-        <Ionicons
-          name={copied ? 'checkmark-circle' : 'copy-outline'}
-          size={scale(18)}
-          color={AppColors.textLight}
-          style={{ marginRight: scale(8) }}
-        />
         <Text style={styles.pixButtonText}>
-          {copied ? 'COPIADO!' : 'COPIAR CHAVE PIX'}
+          {copied ? 'COPIADO!' : 'COPIAR PIX'}
         </Text>
       </TouchableOpacity>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Dados bancários</Text>
+        <Text style={styles.cardTitle}>Dados bancários:</Text>
 
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>Banco</Text>
+          <Text style={styles.rowLabel}>Banco:</Text>
           <Text style={styles.rowValue}>Banco do Brasil</Text>
         </View>
-
-        <View style={styles.rowDivider} />
-
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>Agência</Text>
+          <Text style={styles.rowLabel}>Agência:</Text>
           <Text style={styles.rowValue}>1234-5</Text>
         </View>
-
-        <View style={styles.rowDivider} />
-
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>Conta</Text>
+          <Text style={styles.rowLabel}>Conta:</Text>
           <Text style={styles.rowValue}>12345-6</Text>
         </View>
-
-        <View style={styles.rowDivider} />
-
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>CNPJ</Text>
+          <Text style={styles.rowLabel}>CNPJ:</Text>
           <Text style={styles.rowValue}>12.345.678/0001-90</Text>
         </View>
       </View>
 
       <View style={styles.logoContainer}>
         <Image
-          source={require('@/assets/images/icon.png')}
+          source={require('../../assets/images_igreja/logo_igreja.jpg')}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -88,70 +71,65 @@ export default function DonationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppColors.background,
+    backgroundColor: AppColors.headerBg,
   },
   content: {
-    padding: scale(16),
+    padding: 24,
     alignItems: 'center',
   },
   pixButton: {
-    flexDirection: 'row',
-    backgroundColor: AppColors.primaryDark,
-    borderRadius: scale(10),
-    paddingVertical: scale(12),
-    paddingHorizontal: scale(20),
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
     alignItems: 'center',
-    justifyContent: 'center',
     width: '100%',
-    marginBottom: scale(18),
+    marginBottom: 24,
   },
   pixButtonCopied: {
-    backgroundColor: AppColors.success,
+    backgroundColor: 'rgba(76, 175, 80, 0.3)',
   },
   pixButtonText: {
-    color: AppColors.textLight,
-    fontSize: scale(14),
+    color: '#FFFFFF',
+    fontSize: 14,
     fontWeight: '700',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   },
   card: {
-    backgroundColor: AppColors.cardBackground,
-    borderRadius: scale(12),
-    padding: scale(16),
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 12,
+    padding: 20,
     width: '100%',
-    marginBottom: scale(24),
+    marginBottom: 32,
   },
   cardTitle: {
-    fontSize: scale(15),
+    fontSize: 15,
     fontWeight: '700',
-    color: AppColors.text,
-    marginBottom: scale(14),
+    color: '#FFFFFF',
+    marginBottom: 14,
   },
   row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: scale(8),
+    marginBottom: 8,
   },
   rowLabel: {
-    fontSize: scale(13),
+    fontSize: 14,
     fontWeight: '600',
-    color: AppColors.text,
+    color: 'rgba(255,255,255,0.8)',
+    width: 80,
   },
   rowValue: {
-    fontSize: scale(13),
-    color: AppColors.textSecondary,
-  },
-  rowDivider: {
-    height: 1,
-    backgroundColor: AppColors.border,
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.6)',
+    flex: 1,
   },
   logoContainer: {
     alignItems: 'center',
-    marginTop: scale(8),
+    marginTop: 8,
+    opacity: 0.3,
   },
   logo: {
-    width: scale(80),
-    height: scale(80),
-    opacity: 0.5,
+    width: 100,
+    height: 100,
   },
 });

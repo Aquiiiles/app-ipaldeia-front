@@ -1,13 +1,23 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
-import { scale } from '@/constants/responsive';
 
 const SAMPLE_SERMONS = [
-  { id: '1', title: 'Culto Dominical - 15/12' },
-  { id: '2', title: 'Estudo Bíblico - 18/12' },
-  { id: '3', title: 'Culto de Oração - 20/12' },
+  {
+    id: '1',
+    title: 'PR | Rev. Reinoso Silva | 1 Coríntios 10.29-11.1 |',
+    subtitle: 'Culto Vespertino - 14/12/2025',
+    views: '44 visualizações',
+    time: 'Transmitido há 4 dias',
+  },
+  {
+    id: '2',
+    title: 'PR | Rev. Reinoso Silva | Atos 26.19-23 | Culto',
+    subtitle: 'Vespertino - 07/12/2025',
+    views: '31 visualizações',
+    time: 'Transmitido há 11 dias',
+  },
 ];
 
 export default function SermonsScreen() {
@@ -24,11 +34,9 @@ export default function SermonsScreen() {
       <View style={styles.filterRow}>
         <TouchableOpacity style={styles.filterButton} activeOpacity={0.7}>
           <Text style={styles.filterText}>{selectedMonth}</Text>
-          <Ionicons name="chevron-down" size={scale(13)} color={AppColors.textLight} style={{ marginLeft: scale(4) }} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.filterButton} activeOpacity={0.7}>
           <Text style={styles.filterText}>{selectedYear}</Text>
-          <Ionicons name="chevron-down" size={scale(13)} color={AppColors.textLight} style={{ marginLeft: scale(4) }} />
         </TouchableOpacity>
       </View>
 
@@ -40,10 +48,18 @@ export default function SermonsScreen() {
         {SAMPLE_SERMONS.map((sermon) => (
           <TouchableOpacity key={sermon.id} style={styles.card} activeOpacity={0.7}>
             <View style={styles.cardImage}>
-              <Ionicons name="play-circle-outline" size={scale(32)} color="rgba(255,255,255,0.8)" />
+              <View style={styles.cardImageOverlay}>
+                <Image
+                  source={require('../../assets/images_igreja/logo_igreja.jpg')}
+                  style={styles.cardLogo}
+                  resizeMode="contain"
+                />
+              </View>
             </View>
             <View style={styles.cardInfo}>
-              <Text style={styles.cardTitle}>{sermon.title}</Text>
+              <Text style={styles.cardTitle} numberOfLines={2}>{sermon.title}</Text>
+              <Text style={styles.cardSubtitle}>{sermon.subtitle}</Text>
+              <Text style={styles.cardMeta}>{sermon.views} • {sermon.time}</Text>
             </View>
           </TouchableOpacity>
         ))}
@@ -55,82 +71,96 @@ export default function SermonsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppColors.background,
+    backgroundColor: AppColors.headerBg,
   },
   liveBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: AppColors.primaryDark,
-    marginHorizontal: scale(16),
-    marginTop: scale(14),
-    paddingVertical: scale(12),
-    borderRadius: scale(10),
-    gap: scale(8),
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    marginHorizontal: 20,
+    marginTop: 14,
+    paddingVertical: 12,
+    borderRadius: 10,
+    gap: 8,
   },
   liveDot: {
-    width: scale(8),
-    height: scale(8),
-    borderRadius: scale(4),
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: '#E53935',
   },
   liveText: {
-    color: AppColors.textLight,
-    fontSize: scale(14),
+    color: '#FFFFFF',
+    fontSize: 15,
     fontWeight: '700',
     letterSpacing: 1,
   },
   filterRow: {
     flexDirection: 'row',
-    gap: scale(8),
-    paddingHorizontal: scale(16),
-    paddingTop: scale(12),
-    paddingBottom: scale(6),
+    gap: 10,
+    paddingHorizontal: 20,
+    paddingTop: 14,
+    paddingBottom: 8,
   },
   filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: AppColors.primaryDark,
-    paddingVertical: scale(8),
-    paddingHorizontal: scale(14),
-    borderRadius: scale(20),
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    borderRadius: 20,
   },
   filterText: {
-    color: AppColors.textLight,
-    fontSize: scale(13),
+    color: '#FFFFFF',
+    fontSize: 13,
     fontWeight: '600',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: scale(16),
-    paddingTop: scale(8),
-    paddingBottom: scale(32),
-    gap: scale(12),
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 32,
+    gap: 14,
   },
   card: {
-    backgroundColor: AppColors.cardBackground,
-    borderRadius: scale(12),
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 12,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
   },
   cardImage: {
-    height: scale(120),
-    backgroundColor: AppColors.border,
-    alignItems: 'center',
+    height: 140,
+    backgroundColor: 'rgba(0,0,0,0.2)',
     justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardImageOverlay: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    overflow: 'hidden',
+    opacity: 0.6,
+  },
+  cardLogo: {
+    width: 60,
+    height: 60,
   },
   cardInfo: {
-    padding: scale(12),
+    padding: 12,
   },
   cardTitle: {
-    fontSize: scale(14),
+    fontSize: 13,
     fontWeight: '600',
-    color: AppColors.text,
+    color: '#FFFFFF',
+    marginBottom: 2,
+  },
+  cardSubtitle: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.7)',
+    marginBottom: 4,
+  },
+  cardMeta: {
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.45)',
   },
 });

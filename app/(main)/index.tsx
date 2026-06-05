@@ -6,15 +6,17 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  ImageBackground,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
-import { scale, wp, SCREEN_WIDTH } from '@/constants/responsive';
 
-const GRID_PADDING = scale(16);
-const CARD_GAP = scale(10);
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const GRID_PADDING = 20;
+const CARD_GAP = 12;
 const CARD_SIZE = (SCREEN_WIDTH - GRID_PADDING * 2 - CARD_GAP * 2) / 3;
 
 interface FeatureItem {
@@ -44,7 +46,7 @@ export default function HomeScreen() {
           onPress={() => router.push('/(main)/profile')}
           activeOpacity={0.7}
         >
-          <Ionicons name="menu" size={scale(22)} color="#FFFFFF" />
+          <Ionicons name="menu" size={24} color="#FFFFFF" />
         </TouchableOpacity>
 
         <Image
@@ -54,7 +56,7 @@ export default function HomeScreen() {
         />
 
         <TouchableOpacity style={styles.headerButton} activeOpacity={0.7}>
-          <Ionicons name="notifications-outline" size={scale(20)} color="#FFFFFF" />
+          <Ionicons name="settings-outline" size={22} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 
@@ -63,6 +65,15 @@ export default function HomeScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.logoSection}>
+          <Image
+            source={require('../../assets/images_igreja/logo_igreja.jpg')}
+            style={styles.centerLogo}
+            resizeMode="contain"
+          />
+          <Text style={styles.churchName}>IGREJA{'\n'}PRESBITERIANA{'\n'}DE ALDEIA</Text>
+        </View>
+
         <View style={styles.grid}>
           {features.map((item, index) => (
             <TouchableOpacity
@@ -72,7 +83,7 @@ export default function HomeScreen() {
               onPress={() => router.push(item.route as any)}
             >
               <View style={styles.iconCircle}>
-                <Ionicons name={item.icon} size={scale(22)} color={AppColors.primaryDark} />
+                <Ionicons name={item.icon} size={26} color={AppColors.primaryDark} />
               </View>
               <Text style={styles.cardLabel}>{item.label}</Text>
             </TouchableOpacity>
@@ -81,10 +92,9 @@ export default function HomeScreen() {
 
         <View style={styles.newsSection}>
           <Text style={styles.sectionTitle}>Notícias</Text>
-
           <TouchableOpacity style={styles.newsCard} activeOpacity={0.8}>
             <View style={styles.newsImagePlaceholder}>
-              <Ionicons name="image-outline" size={scale(32)} color="#FFFFFF" />
+              <Ionicons name="image-outline" size={32} color="#FFFFFF" />
             </View>
             <View style={styles.newsContent}>
               <Text style={styles.newsTitle} numberOfLines={2}>
@@ -109,101 +119,121 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: AppColors.headerBg,
-    paddingHorizontal: scale(14),
-    paddingVertical: scale(10),
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
   headerButton: {
-    width: scale(36),
-    height: scale(36),
+    width: 36,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: scale(18),
   },
   headerLogo: {
-    width: scale(100),
-    height: scale(34),
+    width: 36,
+    height: 36,
+    borderRadius: 18,
   },
   scrollView: {
     flex: 1,
-    backgroundColor: AppColors.background,
+    backgroundColor: '#E8E4DD',
   },
   scrollContent: {
-    paddingBottom: scale(24),
+    paddingBottom: 24,
+  },
+  logoSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
+    paddingHorizontal: GRID_PADDING,
+    gap: 12,
+  },
+  centerLogo: {
+    width: 56,
+    height: 56,
+    borderRadius: 8,
+    opacity: 0.6,
+  },
+  churchName: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: AppColors.primaryDark,
+    letterSpacing: 1,
+    lineHeight: 18,
+    opacity: 0.6,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
     paddingHorizontal: GRID_PADDING,
-    paddingTop: scale(18),
-    paddingBottom: scale(6),
     gap: CARD_GAP,
   },
   card: {
     width: CARD_SIZE,
-    height: CARD_SIZE,
-    backgroundColor: AppColors.cardBackground,
-    borderRadius: scale(14),
+    aspectRatio: 1,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
   iconCircle: {
-    width: scale(40),
-    height: scale(40),
-    borderRadius: scale(20),
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: 'rgba(60, 74, 62, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: scale(6),
+    marginBottom: 6,
   },
   cardLabel: {
-    fontSize: scale(11),
+    fontSize: 12,
     fontWeight: '600',
     color: AppColors.primaryDark,
     textAlign: 'center',
   },
   newsSection: {
     paddingHorizontal: GRID_PADDING,
-    paddingTop: scale(14),
+    paddingTop: 20,
   },
   sectionTitle: {
-    fontSize: scale(17),
+    fontSize: 16,
     fontWeight: '700',
     color: AppColors.text,
-    marginBottom: scale(10),
+    marginBottom: 10,
   },
   newsCard: {
-    backgroundColor: AppColors.cardBackground,
-    borderRadius: scale(14),
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    borderRadius: 14,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    flexDirection: 'row',
   },
   newsImagePlaceholder: {
-    height: scale(130),
+    width: 90,
+    height: 90,
     backgroundColor: AppColors.primaryDark,
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 10,
+    margin: 8,
   },
   newsContent: {
-    padding: scale(12),
+    flex: 1,
+    padding: 12,
+    justifyContent: 'center',
   },
   newsTitle: {
-    fontSize: scale(14),
+    fontSize: 14,
     fontWeight: '600',
     color: AppColors.text,
-    marginBottom: scale(4),
+    marginBottom: 4,
   },
   newsDate: {
-    fontSize: scale(11),
+    fontSize: 12,
     color: AppColors.textSecondary,
   },
 });

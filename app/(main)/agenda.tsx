@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { AppColors } from '@/constants/theme';
-import { scale } from '@/constants/responsive';
 
 type TabKey = 'geral' | 'aniversariantes';
 
@@ -21,10 +20,10 @@ const EVENTS: AgendaItem[] = [
 
 const BIRTHDAYS: AgendaItem[] = [
   { id: '1', date: '10/1', label: 'JOSÉ DA SILVA' },
-  { id: '2', date: '15/1', label: 'SIMONE PEREIRA DA COSTA' },
-  { id: '3', date: '10/2', label: 'RAFAEL MENDES DA SILVA' },
-  { id: '4', date: '17/2', label: 'MARIA DA SILVA' },
-  { id: '5', date: '16/2', label: 'CLÁUDIO DA SILVA ROCHA' },
+  { id: '2', date: '15/1', label: 'SIMONE PEREIRA\nDA COSTA' },
+  { id: '3', date: '10/2', label: 'RAFAEL MENDES\nDA SILVA' },
+  { id: '4', date: '17/2', label: 'MARIA\nDA SILVA' },
+  { id: '5', date: '16/2', label: 'CLÁUDIO DA\nSILVA ROCHA' },
 ];
 
 export default function AgendaScreen() {
@@ -35,12 +34,8 @@ export default function AgendaScreen() {
   const renderItem = ({ item, index }: { item: AgendaItem; index: number }) => (
     <View>
       <View style={styles.row}>
-        <View style={styles.dateBox}>
-          <Text style={styles.date}>{item.date}</Text>
-        </View>
-        <View style={styles.labelContainer}>
-          <Text style={styles.label}>{item.label}</Text>
-        </View>
+        <Text style={styles.date}>{item.date}</Text>
+        <Text style={styles.label}>{item.label}</Text>
       </View>
       {index < data.length - 1 && <View style={styles.divider} />}
     </View>
@@ -83,66 +78,56 @@ export default function AgendaScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppColors.background,
+    backgroundColor: AppColors.headerBg,
   },
   tabBar: {
     flexDirection: 'row',
-    paddingHorizontal: scale(16),
-    paddingTop: scale(12),
-    paddingBottom: scale(6),
-    gap: scale(8),
+    paddingHorizontal: 20,
+    paddingTop: 14,
+    paddingBottom: 8,
+    gap: 10,
   },
   tab: {
-    paddingVertical: scale(8),
-    paddingHorizontal: scale(18),
-    borderRadius: scale(20),
-    backgroundColor: AppColors.cardBackground,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.12)',
   },
   tabActive: {
-    backgroundColor: AppColors.primaryDark,
+    backgroundColor: AppColors.accent,
   },
   tabText: {
-    fontSize: scale(13),
+    fontSize: 13,
     fontWeight: '600',
-    color: AppColors.textSecondary,
+    color: 'rgba(255,255,255,0.5)',
   },
   tabTextActive: {
-    color: AppColors.textLight,
+    color: '#FFFFFF',
   },
   listContent: {
-    paddingHorizontal: scale(16),
-    paddingVertical: scale(8),
+    paddingHorizontal: 24,
+    paddingVertical: 8,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: scale(12),
-  },
-  dateBox: {
-    backgroundColor: AppColors.primaryDark,
-    borderRadius: scale(10),
-    paddingHorizontal: scale(12),
-    paddingVertical: scale(8),
-    minWidth: scale(64),
-    alignItems: 'center',
-    marginRight: scale(14),
+    paddingVertical: 14,
   },
   date: {
-    fontSize: scale(16),
+    fontSize: 36,
     fontWeight: '700',
-    color: AppColors.textLight,
-  },
-  labelContainer: {
-    flex: 1,
+    color: '#FFFFFF',
+    minWidth: 100,
   },
   label: {
-    fontSize: scale(14),
+    flex: 1,
+    fontSize: 14,
     fontWeight: '600',
-    color: AppColors.text,
-    letterSpacing: 0.3,
+    color: 'rgba(255,255,255,0.85)',
+    letterSpacing: 0.5,
   },
   divider: {
     height: 1,
-    backgroundColor: AppColors.border,
+    backgroundColor: 'rgba(255,255,255,0.15)',
   },
 });

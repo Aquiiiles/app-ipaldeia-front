@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
-import { scale } from '@/constants/responsive';
 
 type TabKey = 'pastores' | 'presbiteros' | 'diaconos';
 
@@ -50,14 +49,10 @@ export default function LeadershipScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.listContent}>
-        {leaders.map((name, index) => (
+        {leaders.map((name) => (
           <View key={name} style={styles.card}>
             <View style={styles.avatar}>
-              <Ionicons
-                name="person"
-                size={scale(20)}
-                color={AppColors.primaryDark}
-              />
+              <Ionicons name="camera-outline" size={22} color="rgba(255,255,255,0.4)" />
             </View>
             <Text style={styles.leaderName}>{name}</Text>
           </View>
@@ -70,59 +65,59 @@ export default function LeadershipScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppColors.background,
+    backgroundColor: AppColors.headerBg,
   },
   tabRow: {
     flexDirection: 'row',
-    paddingHorizontal: scale(16),
-    paddingTop: scale(12),
-    paddingBottom: scale(6),
-    gap: scale(6),
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 8,
+    gap: 6,
   },
   tab: {
     flex: 1,
-    paddingVertical: scale(9),
-    borderRadius: scale(20),
-    backgroundColor: AppColors.cardBackground,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.12)',
     alignItems: 'center',
   },
   tabActive: {
-    backgroundColor: AppColors.primaryDark,
+    backgroundColor: AppColors.accent,
   },
   tabText: {
-    fontSize: scale(12),
+    fontSize: 12,
     fontWeight: '600',
-    color: AppColors.textSecondary,
+    color: 'rgba(255,255,255,0.5)',
   },
   tabTextActive: {
-    color: AppColors.textLight,
+    color: '#FFFFFF',
   },
   listContent: {
-    paddingHorizontal: scale(16),
-    paddingTop: scale(8),
-    paddingBottom: scale(24),
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 24,
+    gap: 12,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: AppColors.cardBackground,
-    borderRadius: scale(12),
-    padding: scale(14),
-    marginBottom: scale(8),
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 12,
+    padding: 16,
   },
   avatar: {
-    width: scale(42),
-    height: scale(42),
-    borderRadius: scale(21),
-    backgroundColor: 'rgba(60, 74, 62, 0.08)',
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: scale(14),
+    marginRight: 16,
   },
   leaderName: {
-    fontSize: scale(14),
+    fontSize: 15,
     fontWeight: '500',
-    color: AppColors.text,
+    color: '#FFFFFF',
     flex: 1,
   },
 });
