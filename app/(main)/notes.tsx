@@ -9,7 +9,6 @@ import {
   Alert,
 } from 'react-native';
 import { AppColors } from '@/constants/theme';
-import { scale } from '@/constants/responsive';
 
 export default function NotesScreen() {
   const [pregador, setPregador] = useState('');
@@ -34,7 +33,7 @@ export default function NotesScreen() {
         value={pregador}
         onChangeText={setPregador}
         placeholder="Nome do pregador"
-        placeholderTextColor={AppColors.textSecondary}
+        placeholderTextColor="#a0a090"
       />
 
       <View style={styles.divider} />
@@ -45,7 +44,7 @@ export default function NotesScreen() {
         value={texto}
         onChangeText={setTexto}
         placeholder="Referência bíblica"
-        placeholderTextColor={AppColors.textSecondary}
+        placeholderTextColor="#a0a090"
       />
 
       <View style={styles.divider} />
@@ -56,7 +55,7 @@ export default function NotesScreen() {
         value={palavras}
         onChangeText={setPalavras}
         placeholder="Palavras-chave do sermão"
-        placeholderTextColor={AppColors.textSecondary}
+        placeholderTextColor="#a0a090"
         multiline
         textAlignVertical="top"
       />
@@ -69,7 +68,7 @@ export default function NotesScreen() {
         value={aplicacoes}
         onChangeText={setAplicacoes}
         placeholder="Como aplicar na sua vida"
-        placeholderTextColor={AppColors.textSecondary}
+        placeholderTextColor="#a0a090"
         multiline
         textAlignVertical="top"
       />
@@ -84,48 +83,44 @@ export default function NotesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: AppColors.background,
+    backgroundColor: '#E8E4DD',
   },
   scrollContent: {
-    paddingHorizontal: scale(16),
-    paddingTop: scale(18),
-    paddingBottom: scale(32),
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: 40,
   },
   label: {
-    fontSize: scale(14),
+    fontSize: 15,
     fontWeight: '600',
-    color: AppColors.text,
-    marginBottom: scale(6),
+    color: '#4a4a40',
+    marginBottom: 8,
   },
   input: {
-    backgroundColor: AppColors.surface,
-    borderRadius: scale(10),
-    borderWidth: 1,
-    borderColor: AppColors.border,
-    paddingHorizontal: scale(12),
-    paddingVertical: scale(10),
-    fontSize: scale(14),
-    color: AppColors.text,
+    borderBottomWidth: 1,
+    borderBottomColor: '#c5c0b8',
+    paddingVertical: 8,
+    fontSize: 14,
+    color: '#4a4a40',
   },
   multilineInput: {
-    minHeight: scale(100),
-    paddingTop: scale(10),
+    minHeight: 80,
+    borderBottomWidth: 1,
+    borderBottomColor: '#c5c0b8',
   },
   divider: {
-    height: 1,
-    backgroundColor: AppColors.border,
-    marginVertical: scale(14),
+    height: 16,
   },
   saveButton: {
     backgroundColor: AppColors.primaryDark,
-    paddingVertical: scale(12),
-    borderRadius: scale(10),
+    borderRadius: 8,
+    paddingVertical: 14,
     alignItems: 'center',
-    marginTop: scale(20),
+    marginTop: 28,
   },
   saveButtonText: {
-    color: AppColors.textLight,
-    fontSize: scale(14),
+    color: '#FFFFFF',
+    fontSize: 14,
     fontWeight: '700',
     letterSpacing: 1,
   },

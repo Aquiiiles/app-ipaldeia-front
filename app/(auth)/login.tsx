@@ -18,7 +18,6 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { auth } from '../../src/services/firebase';
 import logoIgreja from '../../assets/images_igreja/logo_igreja.jpg';
-import { scale, wp } from '@/constants/responsive';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -62,7 +61,7 @@ export default function LoginScreen() {
     }
     try {
       await sendPasswordResetEmail(auth, email.trim());
-      Alert.alert('Sucesso', 'E-mail de redefinição de senha enviado. Verifique sua caixa de entrada.');
+      Alert.alert('Sucesso', 'E-mail de redefinição enviado. Verifique sua caixa de entrada.');
     } catch (error: any) {
       let message = 'Erro ao enviar e-mail de redefinição.';
       if (error.code === 'auth/user-not-found') {
@@ -93,32 +92,19 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.container}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={logoIgreja}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
-
-          <Text style={styles.title}>Bem-Vindo!</Text>
-          <Text style={styles.subtitle}>
-            Tenha acesso a conteúdos e recursos que facilitam seu dia a dia com
-            a igreja
-          </Text>
+          <Image
+            source={logoIgreja}
+            style={styles.logo}
+            resizeMode="contain"
+          />
 
           <View style={styles.form}>
             <View style={styles.inputWrapper}>
-              <Ionicons
-                name="mail-outline"
-                size={scale(18)}
-                color="#6B6B6B"
-                style={styles.inputIcon}
-              />
+              <Ionicons name="mail-outline" size={18} color="#8a8a7a" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="E-mail"
-                placeholderTextColor="#9E9E9E"
+                placeholder="Seu e-mail"
+                placeholderTextColor="#a0a090"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -128,16 +114,11 @@ export default function LoginScreen() {
             </View>
 
             <View style={styles.inputWrapper}>
-              <Ionicons
-                name="lock-closed-outline"
-                size={scale(18)}
-                color="#6B6B6B"
-                style={styles.inputIcon}
-              />
+              <Ionicons name="lock-closed-outline" size={18} color="#8a8a7a" style={styles.inputIcon} />
               <TextInput
                 style={styles.input}
-                placeholder="Senha"
-                placeholderTextColor="#9E9E9E"
+                placeholder="Sua senha"
+                placeholderTextColor="#a0a090"
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 value={password}
@@ -149,11 +130,24 @@ export default function LoginScreen() {
               >
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                  size={scale(18)}
-                  color="#6B6B6B"
+                  size={18}
+                  color="#8a8a7a"
                 />
               </TouchableOpacity>
             </View>
+
+            <TouchableOpacity
+              style={styles.enterButton}
+              onPress={handleLogin}
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.enterButtonText}>ENTRAR</Text>
+              )}
+            </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.forgotPassword}
@@ -163,50 +157,19 @@ export default function LoginScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.button, styles.primaryButton]}
-              onPress={handleLogin}
-              disabled={loading}
-              activeOpacity={0.8}
-            >
-              {loading ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.primaryButtonText}>ENTRAR</Text>
-              )}
-            </TouchableOpacity>
-
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>ou</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            <TouchableOpacity
-              style={[styles.button, styles.socialButton]}
+              style={styles.gmailButton}
               onPress={handleGmailLogin}
               activeOpacity={0.8}
             >
-              <Ionicons
-                name="logo-google"
-                size={scale(17)}
-                color="#3C4A3E"
-                style={styles.socialIcon}
-              />
-              <Text style={styles.socialButtonText}>ENTRAR COM GMAIL</Text>
+              <Text style={styles.gmailButtonText}>ENTRAR COM GMAIL</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.button, styles.socialButton]}
+              style={styles.facebookButton}
               onPress={handleFacebookLogin}
               activeOpacity={0.8}
             >
-              <Ionicons
-                name="logo-facebook"
-                size={scale(17)}
-                color="#3C4A3E"
-                style={styles.socialIcon}
-              />
-              <Text style={styles.socialButtonText}>ENTRAR COM FACEBOOK</Text>
+              <Text style={styles.facebookButtonText}>ENTRAR COM FACEBOOK</Text>
             </TouchableOpacity>
 
             <View style={styles.registerLinkContainer}>
@@ -225,142 +188,113 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   flex: {
     flex: 1,
-    backgroundColor: '#F5F0EB',
+    backgroundColor: '#E8E4DD',
   },
   scrollContent: {
     flexGrow: 1,
     justifyContent: 'center',
   },
   container: {
-    paddingHorizontal: wp(7),
-    paddingVertical: scale(24),
+    flex: 1,
+    paddingHorizontal: 36,
+    paddingVertical: 40,
     alignItems: 'center',
-    maxWidth: 480,
-    alignSelf: 'center',
-    width: '100%',
-  },
-  logoContainer: {
-    marginBottom: scale(16),
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 5,
+    justifyContent: 'center',
   },
   logo: {
-    width: scale(88),
-    height: scale(88),
-    borderRadius: scale(44),
-  },
-  title: {
-    fontSize: scale(24),
-    fontWeight: '700',
-    color: '#2C2C2C',
-    marginBottom: scale(6),
-  },
-  subtitle: {
-    fontSize: scale(13),
-    color: '#6B6B6B',
-    textAlign: 'center',
-    lineHeight: scale(18),
-    marginBottom: scale(24),
-    paddingHorizontal: scale(8),
+    width: 160,
+    height: 160,
+    marginBottom: 32,
   },
   form: {
     width: '100%',
+    maxWidth: 320,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#D4CFC8',
-    borderRadius: scale(10),
-    marginBottom: scale(10),
-    paddingHorizontal: scale(12),
-    height: scale(46),
+    borderBottomWidth: 1,
+    borderBottomColor: '#c5c0b8',
+    marginBottom: 16,
+    paddingVertical: 8,
   },
   inputIcon: {
-    marginRight: scale(8),
+    marginRight: 10,
   },
   input: {
     flex: 1,
-    fontSize: scale(14),
-    color: '#2C2C2C',
-    height: '100%',
+    fontSize: 14,
+    color: '#4a4a40',
   },
   eyeButton: {
-    padding: scale(4),
+    padding: 4,
   },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: scale(18),
-  },
-  forgotPasswordText: {
-    fontSize: scale(12),
-    color: '#6B6B6B',
-    textDecorationLine: 'underline',
-  },
-  button: {
-    width: '100%',
-    height: scale(44),
-    borderRadius: scale(10),
+  enterButton: {
+    backgroundColor: '#3C4A3E',
+    borderRadius: 25,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row',
+    marginTop: 8,
+    marginBottom: 12,
   },
-  primaryButton: {
-    backgroundColor: '#3C4A3E',
-    marginBottom: scale(16),
-  },
-  primaryButtonText: {
+  enterButtonText: {
     color: '#FFFFFF',
-    fontSize: scale(14),
+    fontSize: 14,
     fontWeight: '700',
+    letterSpacing: 1.5,
+  },
+  forgotPassword: {
+    alignSelf: 'center',
+    marginBottom: 24,
+  },
+  forgotPasswordText: {
+    fontSize: 13,
+    color: '#7a7a70',
+    textDecorationLine: 'underline',
+  },
+  gmailButton: {
+    borderWidth: 1,
+    borderColor: '#c5c0b8',
+    borderRadius: 25,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+    backgroundColor: 'transparent',
+  },
+  gmailButtonText: {
+    color: '#4a4a40',
+    fontSize: 13,
+    fontWeight: '600',
     letterSpacing: 1,
   },
-  divider: {
-    flexDirection: 'row',
+  facebookButton: {
+    backgroundColor: '#3C4A3E',
+    borderRadius: 25,
+    height: 44,
     alignItems: 'center',
-    marginBottom: scale(16),
+    justifyContent: 'center',
+    marginBottom: 16,
   },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#D4CFC8',
-  },
-  dividerText: {
-    marginHorizontal: scale(12),
-    fontSize: scale(12),
-    color: '#9E9E9E',
-  },
-  socialButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#D4CFC8',
-    marginBottom: scale(10),
-  },
-  socialIcon: {
-    marginRight: scale(8),
-  },
-  socialButtonText: {
-    color: '#3C4A3E',
-    fontSize: scale(13),
+  facebookButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
     fontWeight: '600',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   },
   registerLinkContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: scale(8),
+    marginTop: 4,
   },
   registerLinkText: {
-    fontSize: scale(13),
-    color: '#6B6B6B',
+    fontSize: 13,
+    color: '#7a7a70',
   },
   registerLinkAction: {
-    fontSize: scale(13),
+    fontSize: 13,
     fontWeight: '700',
     color: '#3C4A3E',
     textDecorationLine: 'underline',
