@@ -3,17 +3,24 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ScrollView,
   Image,
 } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
+import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
+import { scale } from '@/constants/responsive';
+import { useState } from 'react';
 
 const PIX_KEY = '12.345.678/0001-90';
 
 export default function DonationsScreen() {
-  const handleCopyPix = () => {
-    Alert.alert('Chave PIX', PIX_KEY, [{ text: 'OK' }]);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyPix = async () => {
+    await Clipboard.setStringAsync(PIX_KEY);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -21,30 +28,48 @@ export default function DonationsScreen() {
       style={styles.container}
       contentContainerStyle={styles.content}
     >
-      <TouchableOpacity style={styles.pixButton} onPress={handleCopyPix}>
-        <Text style={styles.pixButtonText}>COPIAR PIX</Text>
+      <TouchableOpacity
+        style={[styles.pixButton, copied && styles.pixButtonCopied]}
+        onPress={handleCopyPix}
+        activeOpacity={0.8}
+      >
+        <Ionicons
+          name={copied ? 'checkmark-circle' : 'copy-outline'}
+          size={scale(18)}
+          color={AppColors.textLight}
+          style={{ marginRight: scale(8) }}
+        />
+        <Text style={styles.pixButtonText}>
+          {copied ? 'COPIADO!' : 'COPIAR CHAVE PIX'}
+        </Text>
       </TouchableOpacity>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Dados bancários:</Text>
+        <Text style={styles.cardTitle}>Dados bancários</Text>
 
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>Banco:</Text>
+          <Text style={styles.rowLabel}>Banco</Text>
           <Text style={styles.rowValue}>Banco do Brasil</Text>
         </View>
 
+        <View style={styles.rowDivider} />
+
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>Agência:</Text>
+          <Text style={styles.rowLabel}>Agência</Text>
           <Text style={styles.rowValue}>1234-5</Text>
         </View>
 
+        <View style={styles.rowDivider} />
+
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>Conta:</Text>
+          <Text style={styles.rowLabel}>Conta</Text>
           <Text style={styles.rowValue}>12345-6</Text>
         </View>
 
+        <View style={styles.rowDivider} />
+
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>CNPJ:</Text>
+          <Text style={styles.rowLabel}>CNPJ</Text>
           <Text style={styles.rowValue}>12.345.678/0001-90</Text>
         </View>
       </View>
@@ -66,59 +91,67 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.background,
   },
   content: {
-    padding: 24,
+    padding: scale(16),
     alignItems: 'center',
   },
   pixButton: {
+    flexDirection: 'row',
     backgroundColor: AppColors.primaryDark,
-    borderRadius: 8,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
+    borderRadius: scale(10),
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(20),
     alignItems: 'center',
+    justifyContent: 'center',
     width: '100%',
-    marginBottom: 24,
+    marginBottom: scale(18),
+  },
+  pixButtonCopied: {
+    backgroundColor: AppColors.success,
   },
   pixButtonText: {
     color: AppColors.textLight,
-    fontSize: 16,
+    fontSize: scale(14),
     fontWeight: '700',
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
   card: {
     backgroundColor: AppColors.cardBackground,
-    borderRadius: 12,
-    padding: 20,
+    borderRadius: scale(12),
+    padding: scale(16),
     width: '100%',
-    marginBottom: 32,
+    marginBottom: scale(24),
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: scale(15),
     fontWeight: '700',
     color: AppColors.text,
-    marginBottom: 16,
+    marginBottom: scale(14),
   },
   row: {
     flexDirection: 'row',
-    marginBottom: 10,
+    justifyContent: 'space-between',
+    paddingVertical: scale(8),
   },
   rowLabel: {
-    fontSize: 15,
+    fontSize: scale(13),
     fontWeight: '600',
     color: AppColors.text,
-    width: 80,
   },
   rowValue: {
-    fontSize: 15,
+    fontSize: scale(13),
     color: AppColors.textSecondary,
-    flex: 1,
+  },
+  rowDivider: {
+    height: 1,
+    backgroundColor: AppColors.border,
   },
   logoContainer: {
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: scale(8),
   },
   logo: {
-    width: 120,
-    height: 120,
-    opacity: 0.7,
+    width: scale(80),
+    height: scale(80),
+    opacity: 0.5,
   },
 });

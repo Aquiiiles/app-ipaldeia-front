@@ -1,27 +1,33 @@
-import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
+import { scale } from '@/constants/responsive';
 
 const GROUPS = [
-  { id: '1', name: 'HOMENS' },
-  { id: '2', name: 'MULHERES' },
-  { id: '3', name: 'JOVENS' },
-  { id: '4', name: 'FUTEBOL' },
-  { id: '5', name: 'PEDAL' },
+  { id: '1', name: 'Homens', icon: 'man-outline' as const },
+  { id: '2', name: 'Mulheres', icon: 'woman-outline' as const },
+  { id: '3', name: 'Jovens', icon: 'people-outline' as const },
+  { id: '4', name: 'Futebol', icon: 'football-outline' as const },
+  { id: '5', name: 'Pedal', icon: 'bicycle-outline' as const },
 ];
 
-const churchLogo = require('../../assets/images_igreja/logo_igreja.jpg');
-
 export default function GroupsScreen() {
-  const renderItem = ({ item, index }: { item: typeof GROUPS[0]; index: number }) => (
-    <View>
-      <View style={styles.row}>
-        <View style={styles.iconContainer}>
-          <Image source={churchLogo} style={styles.icon} />
-        </View>
-        <Text style={styles.groupName}>{item.name}</Text>
+  const handlePress = (groupName: string) => {
+    Alert.alert(groupName, 'Detalhes do grupo em breve.');
+  };
+
+  const renderItem = ({ item }: { item: typeof GROUPS[0] }) => (
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.7}
+      onPress={() => handlePress(item.name)}
+    >
+      <View style={styles.iconContainer}>
+        <Ionicons name={item.icon} size={scale(22)} color={AppColors.primaryDark} />
       </View>
-      {index < GROUPS.length - 1 && <View style={styles.divider} />}
-    </View>
+      <Text style={styles.groupName}>{item.name}</Text>
+      <Ionicons name="chevron-forward" size={scale(16)} color={AppColors.border} />
+    </TouchableOpacity>
   );
 
   return (
@@ -43,35 +49,35 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.background,
   },
   listContent: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(8),
   },
-  row: {
+  card: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 18,
+    backgroundColor: AppColors.cardBackground,
+    borderRadius: scale(12),
+    padding: scale(14),
+    marginBottom: scale(8),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
   },
   iconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    overflow: 'hidden',
-    backgroundColor: AppColors.cardBackground,
-    marginRight: 20,
-  },
-  icon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: scale(42),
+    height: scale(42),
+    borderRadius: scale(21),
+    backgroundColor: 'rgba(60, 74, 62, 0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: scale(14),
   },
   groupName: {
-    fontSize: 20,
+    flex: 1,
+    fontSize: scale(15),
     fontWeight: '600',
     color: AppColors.text,
-    letterSpacing: 1,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: AppColors.border,
   },
 });

@@ -5,10 +5,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
+import { scale } from '@/constants/responsive';
 
 type TabKey = 'pastores' | 'presbiteros' | 'diaconos';
 
@@ -39,6 +39,7 @@ export default function LeadershipScreen() {
               key={tab.key}
               style={[styles.tab, isActive && styles.tabActive]}
               onPress={() => setActiveTab(tab.key)}
+              activeOpacity={0.7}
             >
               <Text style={[styles.tabText, isActive && styles.tabTextActive]}>
                 {tab.label}
@@ -50,18 +51,15 @@ export default function LeadershipScreen() {
 
       <ScrollView contentContainerStyle={styles.listContent}>
         {leaders.map((name, index) => (
-          <View key={name}>
-            {index > 0 && <View style={styles.divider} />}
-            <View style={styles.leaderRow}>
-              <View style={styles.avatar}>
-                <Ionicons
-                  name="person"
-                  size={28}
-                  color={AppColors.textSecondary}
-                />
-              </View>
-              <Text style={styles.leaderName}>{name}</Text>
+          <View key={name} style={styles.card}>
+            <View style={styles.avatar}>
+              <Ionicons
+                name="person"
+                size={scale(20)}
+                color={AppColors.primaryDark}
+              />
             </View>
+            <Text style={styles.leaderName}>{name}</Text>
           </View>
         ))}
       </ScrollView>
@@ -76,15 +74,15 @@ const styles = StyleSheet.create({
   },
   tabRow: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
-    gap: 8,
+    paddingHorizontal: scale(16),
+    paddingTop: scale(12),
+    paddingBottom: scale(6),
+    gap: scale(6),
   },
   tab: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 8,
+    paddingVertical: scale(9),
+    borderRadius: scale(20),
     backgroundColor: AppColors.cardBackground,
     alignItems: 'center',
   },
@@ -92,7 +90,7 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.primaryDark,
   },
   tabText: {
-    fontSize: 14,
+    fontSize: scale(12),
     fontWeight: '600',
     color: AppColors.textSecondary,
   },
@@ -100,32 +98,31 @@ const styles = StyleSheet.create({
     color: AppColors.textLight,
   },
   listContent: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 32,
+    paddingHorizontal: scale(16),
+    paddingTop: scale(8),
+    paddingBottom: scale(24),
   },
-  leaderRow: {
+  card: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    backgroundColor: AppColors.cardBackground,
+    borderRadius: scale(12),
+    padding: scale(14),
+    marginBottom: scale(8),
   },
   avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: AppColors.cardBackground,
+    width: scale(42),
+    height: scale(42),
+    borderRadius: scale(21),
+    backgroundColor: 'rgba(60, 74, 62, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: scale(14),
   },
   leaderName: {
-    fontSize: 17,
+    fontSize: scale(14),
     fontWeight: '500',
     color: AppColors.text,
     flex: 1,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: AppColors.border,
   },
 });

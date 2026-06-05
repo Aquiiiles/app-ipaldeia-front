@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { AppColors } from '@/constants/theme';
+import { scale } from '@/constants/responsive';
 
 export default function NotesScreen() {
   const [pregador, setPregador] = useState('');
@@ -86,45 +87,45 @@ const styles = StyleSheet.create({
     backgroundColor: AppColors.background,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 40,
+    paddingHorizontal: scale(16),
+    paddingTop: scale(18),
+    paddingBottom: scale(32),
   },
   label: {
-    fontSize: 16,
+    fontSize: scale(14),
     fontWeight: '600',
     color: AppColors.text,
-    marginBottom: 8,
+    marginBottom: scale(6),
   },
   input: {
     backgroundColor: AppColors.surface,
-    borderRadius: 10,
+    borderRadius: scale(10),
     borderWidth: 1,
     borderColor: AppColors.border,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(10),
+    fontSize: scale(14),
     color: AppColors.text,
   },
   multilineInput: {
-    minHeight: 120,
-    paddingTop: 12,
+    minHeight: scale(100),
+    paddingTop: scale(10),
   },
   divider: {
     height: 1,
     backgroundColor: AppColors.border,
-    marginVertical: 18,
+    marginVertical: scale(14),
   },
   saveButton: {
     backgroundColor: AppColors.primaryDark,
-    paddingVertical: 16,
-    borderRadius: 12,
+    paddingVertical: scale(12),
+    borderRadius: scale(10),
     alignItems: 'center',
-    marginTop: 28,
+    marginTop: scale(20),
   },
   saveButtonText: {
     color: AppColors.textLight,
-    fontSize: 16,
+    fontSize: scale(14),
     fontWeight: '700',
     letterSpacing: 1,
   },

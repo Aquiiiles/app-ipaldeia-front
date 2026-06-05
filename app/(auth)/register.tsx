@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { auth } from '../../src/services/firebase';
 import logoIgreja from '../../assets/images_igreja/logo_igreja.jpg';
+import { scale, wp } from '@/constants/responsive';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -93,7 +94,7 @@ export default function RegisterScreen() {
             <View style={styles.inputWrapper}>
               <Ionicons
                 name="person-outline"
-                size={20}
+                size={scale(18)}
                 color="#6B6B6B"
                 style={styles.inputIcon}
               />
@@ -111,7 +112,7 @@ export default function RegisterScreen() {
             <View style={styles.inputWrapper}>
               <Ionicons
                 name="mail-outline"
-                size={20}
+                size={scale(18)}
                 color="#6B6B6B"
                 style={styles.inputIcon}
               />
@@ -130,7 +131,7 @@ export default function RegisterScreen() {
             <View style={styles.inputWrapper}>
               <Ionicons
                 name="lock-closed-outline"
-                size={20}
+                size={scale(18)}
                 color="#6B6B6B"
                 style={styles.inputIcon}
               />
@@ -149,7 +150,7 @@ export default function RegisterScreen() {
               >
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                  size={20}
+                  size={scale(18)}
                   color="#6B6B6B"
                 />
               </TouchableOpacity>
@@ -158,7 +159,7 @@ export default function RegisterScreen() {
             <View style={styles.inputWrapper}>
               <Ionicons
                 name="lock-closed-outline"
-                size={20}
+                size={scale(18)}
                 color="#6B6B6B"
                 style={styles.inputIcon}
               />
@@ -177,7 +178,7 @@ export default function RegisterScreen() {
               >
                 <Ionicons
                   name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
-                  size={20}
+                  size={scale(18)}
                   color="#6B6B6B"
                 />
               </TouchableOpacity>
@@ -216,40 +217,42 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    justifyContent: 'center',
   },
   container: {
-    flex: 1,
-    paddingHorizontal: 32,
-    paddingTop: 60,
-    paddingBottom: 40,
+    paddingHorizontal: wp(7),
+    paddingVertical: scale(24),
     alignItems: 'center',
+    maxWidth: 480,
+    alignSelf: 'center',
+    width: '100%',
   },
   logoContainer: {
-    marginBottom: 24,
+    marginBottom: scale(16),
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 5,
   },
   logo: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: scale(72),
+    height: scale(72),
+    borderRadius: scale(36),
   },
   title: {
-    fontSize: 28,
+    fontSize: scale(24),
     fontWeight: '700',
     color: '#2C2C2C',
-    marginBottom: 8,
+    marginBottom: scale(6),
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: scale(13),
     color: '#6B6B6B',
     textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 32,
-    paddingHorizontal: 16,
+    lineHeight: scale(18),
+    marginBottom: scale(24),
+    paddingHorizontal: scale(8),
   },
   form: {
     width: '100%',
@@ -260,39 +263,39 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#D4CFC8',
-    borderRadius: 12,
-    marginBottom: 14,
-    paddingHorizontal: 14,
-    height: 52,
+    borderRadius: scale(10),
+    marginBottom: scale(10),
+    paddingHorizontal: scale(12),
+    height: scale(46),
   },
   inputIcon: {
-    marginRight: 10,
+    marginRight: scale(8),
   },
   input: {
     flex: 1,
-    fontSize: 15,
+    fontSize: scale(14),
     color: '#2C2C2C',
     height: '100%',
   },
   eyeButton: {
-    padding: 4,
+    padding: scale(4),
   },
   button: {
     width: '100%',
-    height: 52,
-    borderRadius: 12,
+    height: scale(44),
+    borderRadius: scale(10),
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
-    marginTop: 10,
+    marginTop: scale(6),
   },
   primaryButton: {
     backgroundColor: '#3C4A3E',
-    marginBottom: 20,
+    marginBottom: scale(16),
   },
   primaryButtonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: scale(14),
     fontWeight: '700',
     letterSpacing: 1,
   },
@@ -302,11 +305,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loginLinkText: {
-    fontSize: 14,
+    fontSize: scale(13),
     color: '#6B6B6B',
   },
   loginLinkAction: {
-    fontSize: 14,
+    fontSize: scale(13),
     fontWeight: '700',
     color: '#3C4A3E',
     textDecorationLine: 'underline',
