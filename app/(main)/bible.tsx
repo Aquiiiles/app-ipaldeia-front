@@ -11,36 +11,49 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
-import { BIBLE_BOOKS } from '@/constants/bibleBooks';
+import { BIBLE_BOOKS, BIBLE_VERSIONS, BibleVersion } from '@/constants/bibleBooks';
 
-type BibleBook = {
+type BibleBookData = {
   abbrev: string;
+  name: string;
   chapters: string[][];
 };
 
-let bibleDataCache: BibleBook[] | null = null;
+const bibleCache: Record<string, BibleBookData[]> = {};
 
-function loadBibleData(): BibleBook[] {
-  if (!bibleDataCache) {
-    bibleDataCache = require('../../assets/bible/pt_aa.json');
+function loadBibleData(version: BibleVersion): BibleBookData[] {
+  if (!bibleCache[version]) {
+    switch (version) {
+      case 'ARA':
+        bibleCache[version] = require('../../assets/bible/ARA.json');
+        break;
+      case 'NVI':
+        bibleCache[version] = require('../../assets/bible/NVI.json');
+        break;
+      case 'NAA':
+        bibleCache[version] = require('../../assets/bible/NAA.json');
+        break;
+    }
   }
-  return bibleDataCache!;
+  return bibleCache[version];
 }
 
 export default function BibleScreen() {
+  const [version, setVersion] = useState<BibleVersion>('ARA');
   const [bookIndex, setBookIndex] = useState(0);
   const [chapter, setChapter] = useState(0);
   const [verses, setVerses] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [showBookPicker, setShowBookPicker] = useState(false);
   const [showChapterPicker, setShowChapterPicker] = useState(false);
+  const [showVersionPicker, setShowVersionPicker] = useState(false);
 
   const currentBook = BIBLE_BOOKS[bookIndex];
 
-  const loadChapter = useCallback((bIdx: number, ch: number) => {
+  const loadChapter = useCallback((ver: BibleVersion, bIdx: number, ch: number) => {
     setLoading(true);
     setTimeout(() => {
-      const data = loadBibleData();
+      const data = loadBibleData(ver);
       const bookData = data[bIdx];
       if (bookData && bookData.chapters[ch]) {
         setVerses(bookData.chapters[ch]);
@@ -50,8 +63,8 @@ export default function BibleScreen() {
   }, []);
 
   useEffect(() => {
-    loadChapter(bookIndex, chapter);
-  }, [bookIndex, chapter, loadChapter]);
+    loadChapter(version, bookIndex, chapter);
+  }, [version, bookIndex, chapter, loadChapter]);
 
   const selectBook = (index: number) => {
     setBookIndex(index);
@@ -62,6 +75,11 @@ export default function BibleScreen() {
   const selectChapter = (ch: number) => {
     setChapter(ch);
     setShowChapterPicker(false);
+  };
+
+  const selectVersion = (ver: BibleVersion) => {
+    setVersion(ver);
+    setShowVersionPicker(false);
   };
 
   const goToPrevChapter = () => {
@@ -94,7 +112,6 @@ export default function BibleScreen() {
           onPress={() => setShowBookPicker(true)}
           activeOpacity={0.7}
         >
-          <Ionicons name="book-outline" size={14} color={AppColors.textLight} style={{ marginRight: 6 }} />
           <Text style={styles.selectorText}>{currentBook.name}</Text>
           <Ionicons name="chevron-down" size={14} color={AppColors.textLight} style={{ marginLeft: 4 }} />
         </TouchableOpacity>
@@ -105,6 +122,15 @@ export default function BibleScreen() {
         >
           <Text style={styles.selectorText}>Cap {chapter + 1}</Text>
           <Ionicons name="chevron-down" size={14} color={AppColors.textLight} style={{ marginLeft: 4 }} />
+        </TouchableOpacity>
+        <View style={{ flex: 1 }} />
+        <TouchableOpacity
+          style={styles.versionButton}
+          onPress={() => setShowVersionPicker(true)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.versionText}>{version}</Text>
+          <Ionicons name="chevron-down" size={12} color={AppColors.primaryDark} style={{ marginLeft: 3 }} />
         </TouchableOpacity>
       </View>
 
@@ -137,9 +163,7 @@ export default function BibleScreen() {
           <Ionicons name="chevron-back" size={20} color={hasPrev ? AppColors.primaryDark : AppColors.border} />
           <Text style={[styles.navButtonText, !hasPrev && styles.navButtonTextDisabled]}>Anterior</Text>
         </TouchableOpacity>
-
         <Text style={styles.navInfo}>{currentBook.name} {chapter + 1}</Text>
-
         <TouchableOpacity
           style={[styles.navButton, !hasNext && styles.navButtonDisabled]}
           onPress={goToNextChapter}
@@ -161,11 +185,10 @@ export default function BibleScreen() {
                 <Ionicons name="close" size={24} color={AppColors.text} />
               </TouchableOpacity>
             </View>
-
-            <Text style={styles.sectionLabel}>Antigo Testamento</Text>
             <FlatList
               data={BIBLE_BOOKS}
               keyExtractor={(item) => item.abbrev}
+              ListHeaderComponent={<Text style={styles.sectionLabel}>Antigo Testamento</Text>}
               renderItem={({ item, index }) => (
                 <>
                   {index === 39 && <Text style={styles.sectionLabel}>Novo Testamento</Text>}
@@ -184,8 +207,6 @@ export default function BibleScreen() {
                 </>
               )}
               showsVerticalScrollIndicator={false}
-              initialScrollIndex={bookIndex > 5 ? bookIndex - 3 : 0}
-              getItemLayout={(_, index) => ({ length: 48, offset: 48 * index, index })}
             />
           </View>
         </View>
@@ -218,10 +239,43 @@ export default function BibleScreen() {
                 </TouchableOpacity>
               )}
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 20 }}
+              contentContainerStyle={{ padding: 16 }}
             />
           </View>
         </View>
+      </Modal>
+
+      {/* Version Picker Modal */}
+      <Modal visible={showVersionPicker} animationType="fade" transparent>
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowVersionPicker(false)}
+        >
+          <View style={styles.versionModal}>
+            <Text style={styles.versionModalTitle}>Versão da Bíblia</Text>
+            {BIBLE_VERSIONS.map((v) => (
+              <TouchableOpacity
+                key={v.key}
+                style={[styles.versionItem, v.key === version && styles.versionItemActive]}
+                onPress={() => selectVersion(v.key)}
+                activeOpacity={0.7}
+              >
+                <View>
+                  <Text style={[styles.versionItemLabel, v.key === version && styles.versionItemLabelActive]}>
+                    {v.label}
+                  </Text>
+                  <Text style={[styles.versionItemDesc, v.key === version && styles.versionItemDescActive]}>
+                    {v.description}
+                  </Text>
+                </View>
+                {v.key === version && (
+                  <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
       </Modal>
     </View>
   );
@@ -234,6 +288,7 @@ const styles = StyleSheet.create({
   },
   selectorRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 8,
     paddingHorizontal: 16,
     paddingTop: 14,
@@ -251,6 +306,21 @@ const styles = StyleSheet.create({
     color: AppColors.textLight,
     fontSize: 13,
     fontWeight: '600',
+  },
+  versionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: AppColors.cardBackground,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: AppColors.border,
+  },
+  versionText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: AppColors.primaryDark,
   },
   loadingContainer: {
     flex: 1,
@@ -308,8 +378,6 @@ const styles = StyleSheet.create({
     color: AppColors.textSecondary,
     fontWeight: '500',
   },
-
-  // Modal styles
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -352,7 +420,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 13,
     paddingHorizontal: 20,
-    height: 48,
   },
   bookItemActive: {
     backgroundColor: AppColors.primaryDark,
@@ -376,7 +443,6 @@ const styles = StyleSheet.create({
   chapterRow: {
     justifyContent: 'flex-start',
     gap: 8,
-    paddingHorizontal: 20,
     marginBottom: 8,
   },
   chapterItem: {
@@ -397,5 +463,52 @@ const styles = StyleSheet.create({
   },
   chapterItemTextActive: {
     color: '#FFFFFF',
+  },
+  versionModal: {
+    backgroundColor: '#F5F0EB',
+    marginHorizontal: 24,
+    marginBottom: 100,
+    marginTop: 'auto',
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  versionModalTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: AppColors.text,
+    marginBottom: 14,
+  },
+  versionItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    marginBottom: 6,
+  },
+  versionItemActive: {
+    backgroundColor: AppColors.primaryDark,
+  },
+  versionItemLabel: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: AppColors.text,
+  },
+  versionItemLabelActive: {
+    color: '#FFFFFF',
+  },
+  versionItemDesc: {
+    fontSize: 12,
+    color: AppColors.textSecondary,
+    marginTop: 1,
+  },
+  versionItemDescActive: {
+    color: 'rgba(255,255,255,0.7)',
   },
 });
