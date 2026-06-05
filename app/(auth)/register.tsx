@@ -10,7 +10,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { router } from 'expo-router';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
@@ -18,6 +17,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { auth } from '../../src/services/firebase';
 import logoIgreja from '../../assets/images_igreja/logo_igreja.jpg';
+import Toast from '@/components/Toast';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -27,18 +27,27 @@ export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState({ visible: false, message: '', type: 'error' as 'success' | 'error' | 'warning' });
+
+  function showToast(message: string, type: 'success' | 'error' | 'warning' = 'error') {
+    setToast({ visible: true, message, type });
+  }
+
+  function hideToast() {
+    setToast(prev => ({ ...prev, visible: false }));
+  }
 
   async function handleRegister() {
     if (!name.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
-      Alert.alert('Atenção', 'Preencha todos os campos.');
+      showToast('Preencha todos os campos.', 'warning');
       return;
     }
     if (password !== confirmPassword) {
-      Alert.alert('Atenção', 'As senhas não coincidem.');
+      showToast('As senhas não coincidem.', 'warning');
       return;
     }
     if (password.length < 6) {
-      Alert.alert('Atenção', 'A senha deve ter pelo menos 6 caracteres.');
+      showToast('A senha deve ter pelo menos 6 caracteres.', 'warning');
       return;
     }
 
@@ -48,15 +57,16 @@ export default function RegisterScreen() {
       await updateProfile(userCredential.user, { displayName: name.trim() });
       router.replace('/(main)');
     } catch (error: any) {
-      let message = 'Ocorreu um erro ao criar a conta. Tente novamente.';
+      console.log('Register error:', error.code);
       if (error.code === 'auth/email-already-in-use') {
-        message = 'Este e-mail já está em uso.';
+        showToast('Este e-mail já está em uso.');
       } else if (error.code === 'auth/invalid-email') {
-        message = 'E-mail inválido.';
+        showToast('E-mail inválido.');
       } else if (error.code === 'auth/weak-password') {
-        message = 'A senha é muito fraca. Use pelo menos 6 caracteres.';
+        showToast('A senha é muito fraca. Use pelo menos 6 caracteres.');
+      } else {
+        showToast('Erro ao criar a conta. Tente novamente.');
       }
-      Alert.alert('Erro', message);
     } finally {
       setLoading(false);
     }
@@ -67,6 +77,12 @@ export default function RegisterScreen() {
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <Toast
+        visible={toast.visible}
+        message={toast.message}
+        type={toast.type}
+        onHide={hideToast}
+      />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"

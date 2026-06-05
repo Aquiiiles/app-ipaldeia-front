@@ -10,24 +10,34 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { router } from 'expo-router';
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup } from 'firebase/auth';
 import { Ionicons } from '@expo/vector-icons';
 
-import { auth } from '../../src/services/firebase';
+import { auth, googleProvider } from '../../src/services/firebase';
 import logoIgreja from '../../assets/images_igreja/logo_igreja.jpg';
+import Toast from '@/components/Toast';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [toast, setToast] = useState({ visible: false, message: '', type: 'error' as 'success' | 'error' | 'warning' });
+
+  function showToast(message: string, type: 'success' | 'error' | 'warning' = 'error') {
+    setToast({ visible: true, message, type });
+  }
+
+  function hideToast() {
+    setToast(prev => ({ ...prev, visible: false }));
+  }
 
   async function handleLogin() {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Atenção', 'Preencha todos os campos.');
+      showToast('Preencha todos os campos.', 'warning');
       return;
     }
 
@@ -36,19 +46,20 @@ export default function LoginScreen() {
       await signInWithEmailAndPassword(auth, email.trim(), password);
       router.replace('/(main)');
     } catch (error: any) {
-      let message = 'Ocorreu um erro ao fazer login. Tente novamente.';
+      console.log('Login error:', error.code);
       if (
         error.code === 'auth/user-not-found' ||
         error.code === 'auth/wrong-password' ||
         error.code === 'auth/invalid-credential'
       ) {
-        message = 'E-mail ou senha incorretos.';
+        showToast('E-mail ou senha incorretos.');
       } else if (error.code === 'auth/invalid-email') {
-        message = 'E-mail inválido.';
+        showToast('E-mail inválido.');
       } else if (error.code === 'auth/too-many-requests') {
-        message = 'Muitas tentativas. Tente novamente mais tarde.';
+        showToast('Muitas tentativas. Tente novamente mais tarde.', 'warning');
+      } else {
+        showToast('Erro ao fazer login. Tente novamente.');
       }
-      Alert.alert('Erro', message);
     } finally {
       setLoading(false);
     }
@@ -56,29 +67,57 @@ export default function LoginScreen() {
 
   async function handleForgotPassword() {
     if (!email.trim()) {
-      Alert.alert('Atenção', 'Digite seu e-mail para redefinir a senha.');
+      showToast('Digite seu e-mail no campo acima para redefinir a senha.', 'warning');
       return;
     }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      showToast('Digite um e-mail válido.', 'warning');
+      return;
+    }
+
     try {
       await sendPasswordResetEmail(auth, email.trim());
-      Alert.alert('Sucesso', 'E-mail de redefinição enviado. Verifique sua caixa de entrada.');
+      showToast('E-mail de redefinição enviado! Verifique sua caixa de entrada.', 'success');
     } catch (error: any) {
-      let message = 'Erro ao enviar e-mail de redefinição.';
+      console.log('Forgot password error:', error.code);
       if (error.code === 'auth/user-not-found') {
-        message = 'Nenhuma conta encontrada com este e-mail.';
+        showToast('Nenhuma conta encontrada com este e-mail.');
       } else if (error.code === 'auth/invalid-email') {
-        message = 'E-mail inválido.';
+        showToast('E-mail inválido.');
+      } else {
+        showToast('Erro ao enviar e-mail de redefinição.');
       }
-      Alert.alert('Erro', message);
     }
   }
 
-  function handleGmailLogin() {
-    Alert.alert('Google', 'Login com Google em breve.');
+  async function handleGoogleLogin() {
+    if (Platform.OS !== 'web') {
+      showToast('Login com Google disponível apenas na versão web por enquanto.', 'warning');
+      return;
+    }
+
+    setGoogleLoading(true);
+    try {
+      await signInWithPopup(auth, googleProvider);
+      router.replace('/(main)');
+    } catch (error: any) {
+      console.log('Google login error:', error.code);
+      if (error.code === 'auth/popup-closed-by-user') {
+        // user closed, do nothing
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        // duplicate popup, ignore
+      } else {
+        showToast('Erro ao fazer login com Google.');
+      }
+    } finally {
+      setGoogleLoading(false);
+    }
   }
 
   function handleFacebookLogin() {
-    Alert.alert('Facebook', 'Login com Facebook em breve.');
+    showToast('Login com Facebook estará disponível em breve.', 'warning');
   }
 
   return (
@@ -86,6 +125,12 @@ export default function LoginScreen() {
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
+      <Toast
+        visible={toast.visible}
+        message={toast.message}
+        type={toast.type}
+        onHide={hideToast}
+      />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
@@ -158,10 +203,15 @@ export default function LoginScreen() {
 
             <TouchableOpacity
               style={styles.gmailButton}
-              onPress={handleGmailLogin}
+              onPress={handleGoogleLogin}
+              disabled={googleLoading}
               activeOpacity={0.8}
             >
-              <Text style={styles.gmailButtonText}>ENTRAR COM GMAIL</Text>
+              {googleLoading ? (
+                <ActivityIndicator color="#4a4a40" />
+              ) : (
+                <Text style={styles.gmailButtonText}>ENTRAR COM GMAIL</Text>
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity
