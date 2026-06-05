@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,77 +6,272 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
-  Alert,
+  Modal,
+  FlatList,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppColors } from '@/constants/theme';
+import Toast from '@/components/Toast';
+
+const STORAGE_KEY = '@ipaldeia_notes';
+
+type Note = {
+  id: string;
+  pregador: string;
+  texto: string;
+  palavras: string;
+  aplicacoes: string;
+  createdAt: string;
+};
 
 export default function NotesScreen() {
+  const [notes, setNotes] = useState<Note[]>([]);
   const [pregador, setPregador] = useState('');
   const [texto, setTexto] = useState('');
   const [palavras, setPalavras] = useState('');
   const [aplicacoes, setAplicacoes] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
+  const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' | 'warning' });
 
-  const handleSave = () => {
-    Alert.alert('Sucesso', 'Anotação salva com sucesso!');
-  };
+  function showToast(message: string, type: 'success' | 'error' | 'warning' = 'success') {
+    setToast({ visible: true, message, type });
+  }
+
+  function hideToast() {
+    setToast(prev => ({ ...prev, visible: false }));
+  }
+
+  const loadNotes = useCallback(async () => {
+    try {
+      const stored = await AsyncStorage.getItem(STORAGE_KEY);
+      if (stored) setNotes(JSON.parse(stored));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    loadNotes();
+  }, [loadNotes]);
+
+  async function saveToStorage(updated: Note[]) {
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    setNotes(updated);
+  }
+
+  function clearForm() {
+    setPregador('');
+    setTexto('');
+    setPalavras('');
+    setAplicacoes('');
+    setEditingId(null);
+  }
+
+  function openNewNote() {
+    clearForm();
+    setShowForm(true);
+  }
+
+  function openEditNote(note: Note) {
+    setPregador(note.pregador);
+    setTexto(note.texto);
+    setPalavras(note.palavras);
+    setAplicacoes(note.aplicacoes);
+    setEditingId(note.id);
+    setShowForm(true);
+  }
+
+  async function handleSave() {
+    if (!pregador.trim() && !texto.trim() && !palavras.trim() && !aplicacoes.trim()) {
+      showToast('Preencha pelo menos um campo.', 'warning');
+      return;
+    }
+
+    try {
+      let updated: Note[];
+      if (editingId) {
+        updated = notes.map(n =>
+          n.id === editingId
+            ? { ...n, pregador: pregador.trim(), texto: texto.trim(), palavras: palavras.trim(), aplicacoes: aplicacoes.trim() }
+            : n
+        );
+        showToast('Anotação atualizada!');
+      } else {
+        const newNote: Note = {
+          id: Date.now().toString(),
+          pregador: pregador.trim(),
+          texto: texto.trim(),
+          palavras: palavras.trim(),
+          aplicacoes: aplicacoes.trim(),
+          createdAt: new Date().toISOString(),
+        };
+        updated = [newNote, ...notes];
+        showToast('Anotação salva!');
+      }
+      await saveToStorage(updated);
+      setShowForm(false);
+      clearForm();
+    } catch {
+      showToast('Erro ao salvar.', 'error');
+    }
+  }
+
+  async function handleDelete(id: string) {
+    try {
+      const updated = notes.filter(n => n.id !== id);
+      await saveToStorage(updated);
+      setShowDeleteConfirm(null);
+      showToast('Anotação excluída.');
+    } catch {
+      showToast('Erro ao excluir.', 'error');
+    }
+  }
+
+  function formatDate(iso: string) {
+    const d = new Date(iso);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
-      <Text style={styles.label}>Pregador:</Text>
-      <TextInput
-        style={styles.input}
-        value={pregador}
-        onChangeText={setPregador}
-        placeholder="Nome do pregador"
-        placeholderTextColor="#a0a090"
-      />
+    <View style={styles.container}>
+      <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={hideToast} />
 
-      <View style={styles.divider} />
+      {!showForm ? (
+        <>
+          {notes.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="document-text-outline" size={56} color="#c5c0b8" />
+              <Text style={styles.emptyTitle}>Nenhuma anotação</Text>
+              <Text style={styles.emptyDesc}>Suas anotações de sermões ficarão salvas aqui.</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={notes}
+              keyExtractor={item => item.id}
+              contentContainerStyle={styles.listContent}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => (
+                <TouchableOpacity style={styles.noteCard} onPress={() => openEditNote(item)} activeOpacity={0.7}>
+                  <View style={styles.noteCardHeader}>
+                    <View style={styles.noteCardInfo}>
+                      {item.pregador ? (
+                        <Text style={styles.noteCardPregador} numberOfLines={1}>{item.pregador}</Text>
+                      ) : null}
+                      {item.texto ? (
+                        <Text style={styles.noteCardTexto} numberOfLines={1}>{item.texto}</Text>
+                      ) : null}
+                    </View>
+                    <TouchableOpacity onPress={() => setShowDeleteConfirm(item.id)} style={styles.deleteBtn}>
+                      <Ionicons name="trash-outline" size={18} color="#c0392b" />
+                    </TouchableOpacity>
+                  </View>
+                  {item.palavras ? (
+                    <Text style={styles.noteCardPreview} numberOfLines={2}>{item.palavras}</Text>
+                  ) : item.aplicacoes ? (
+                    <Text style={styles.noteCardPreview} numberOfLines={2}>{item.aplicacoes}</Text>
+                  ) : null}
+                  <Text style={styles.noteCardDate}>{formatDate(item.createdAt)}</Text>
+                </TouchableOpacity>
+              )}
+            />
+          )}
 
-      <Text style={styles.label}>Texto:</Text>
-      <TextInput
-        style={styles.input}
-        value={texto}
-        onChangeText={setTexto}
-        placeholder="Referência bíblica"
-        placeholderTextColor="#a0a090"
-      />
+          <TouchableOpacity style={styles.fab} onPress={openNewNote} activeOpacity={0.8}>
+            <Ionicons name="add" size={28} color="#FFFFFF" />
+          </TouchableOpacity>
+        </>
+      ) : (
+        <ScrollView
+          contentContainerStyle={styles.formContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.formHeader}>
+            <TouchableOpacity onPress={() => { setShowForm(false); clearForm(); }} style={styles.backBtn}>
+              <Ionicons name="arrow-back" size={22} color="#4a4a40" />
+            </TouchableOpacity>
+            <Text style={styles.formTitle}>{editingId ? 'Editar Anotação' : 'Nova Anotação'}</Text>
+            <View style={{ width: 22 }} />
+          </View>
 
-      <View style={styles.divider} />
+          <Text style={styles.label}>Pregador:</Text>
+          <TextInput
+            style={styles.input}
+            value={pregador}
+            onChangeText={setPregador}
+            placeholder="Nome do pregador"
+            placeholderTextColor="#a0a090"
+          />
 
-      <Text style={styles.label}>Palavras importantes:</Text>
-      <TextInput
-        style={[styles.input, styles.multilineInput]}
-        value={palavras}
-        onChangeText={setPalavras}
-        placeholder="Palavras-chave do sermão"
-        placeholderTextColor="#a0a090"
-        multiline
-        textAlignVertical="top"
-      />
+          <View style={styles.divider} />
 
-      <View style={styles.divider} />
+          <Text style={styles.label}>Texto:</Text>
+          <TextInput
+            style={styles.input}
+            value={texto}
+            onChangeText={setTexto}
+            placeholder="Referência bíblica"
+            placeholderTextColor="#a0a090"
+          />
 
-      <Text style={styles.label}>Aplicações:</Text>
-      <TextInput
-        style={[styles.input, styles.multilineInput]}
-        value={aplicacoes}
-        onChangeText={setAplicacoes}
-        placeholder="Como aplicar na sua vida"
-        placeholderTextColor="#a0a090"
-        multiline
-        textAlignVertical="top"
-      />
+          <View style={styles.divider} />
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave} activeOpacity={0.8}>
-        <Text style={styles.saveButtonText}>SALVAR</Text>
-      </TouchableOpacity>
-    </ScrollView>
+          <Text style={styles.label}>Palavras importantes:</Text>
+          <TextInput
+            style={[styles.input, styles.multilineInput]}
+            value={palavras}
+            onChangeText={setPalavras}
+            placeholder="Palavras-chave do sermão"
+            placeholderTextColor="#a0a090"
+            multiline
+            textAlignVertical="top"
+          />
+
+          <View style={styles.divider} />
+
+          <Text style={styles.label}>Aplicações:</Text>
+          <TextInput
+            style={[styles.input, styles.multilineInput]}
+            value={aplicacoes}
+            onChangeText={setAplicacoes}
+            placeholder="Como aplicar na sua vida"
+            placeholderTextColor="#a0a090"
+            multiline
+            textAlignVertical="top"
+          />
+
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave} activeOpacity={0.8}>
+            <Text style={styles.saveButtonText}>SALVAR</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      )}
+
+      {/* Delete Confirm Modal */}
+      <Modal visible={showDeleteConfirm !== null} animationType="fade" transparent>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowDeleteConfirm(null)}>
+          <View style={styles.confirmModal}>
+            <Text style={styles.confirmTitle}>Excluir anotação?</Text>
+            <Text style={styles.confirmDesc}>Esta ação não pode ser desfeita.</Text>
+            <View style={styles.confirmButtons}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowDeleteConfirm(null)} activeOpacity={0.7}>
+                <Text style={styles.cancelBtnText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.confirmDeleteBtn}
+                onPress={() => showDeleteConfirm && handleDelete(showDeleteConfirm)}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.confirmDeleteText}>Excluir</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </View>
   );
 }
 
@@ -85,10 +280,106 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#E8E4DD',
   },
-  scrollContent: {
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+    gap: 8,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#4a4a40',
+    marginTop: 8,
+  },
+  emptyDesc: {
+    fontSize: 14,
+    color: '#8a8a7a',
+    textAlign: 'center',
+  },
+  listContent: {
+    padding: 20,
+    paddingBottom: 100,
+    gap: 12,
+  },
+  noteCard: {
+    backgroundColor: '#F5F0EB',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  noteCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 6,
+  },
+  noteCardInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  noteCardPregador: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#3C4A3E',
+    marginBottom: 2,
+  },
+  noteCardTexto: {
+    fontSize: 13,
+    color: '#6B6B6B',
+  },
+  deleteBtn: {
+    padding: 4,
+  },
+  noteCardPreview: {
+    fontSize: 13,
+    color: '#8a8a7a',
+    lineHeight: 18,
+    marginBottom: 6,
+  },
+  noteCardDate: {
+    fontSize: 11,
+    color: '#b0b0a0',
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    right: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: AppColors.primaryDark,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  formContent: {
     paddingHorizontal: 24,
-    paddingTop: 20,
+    paddingTop: 12,
     paddingBottom: 40,
+  },
+  formHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  backBtn: {
+    padding: 4,
+  },
+  formTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#3C4A3E',
   },
   label: {
     fontSize: 15,
@@ -123,5 +414,65 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
     letterSpacing: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  confirmModal: {
+    backgroundColor: '#F5F0EB',
+    borderRadius: 16,
+    padding: 24,
+    width: '80%',
+    maxWidth: 320,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  confirmTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#3C4A3E',
+    marginBottom: 8,
+  },
+  confirmDesc: {
+    fontSize: 14,
+    color: '#6B6B6B',
+    marginBottom: 24,
+  },
+  confirmButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  cancelBtn: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#c5c0b8',
+    borderRadius: 25,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelBtnText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#4a4a40',
+  },
+  confirmDeleteBtn: {
+    flex: 1,
+    backgroundColor: '#c0392b',
+    borderRadius: 25,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmDeleteText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });
