@@ -1,69 +1,130 @@
-import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+  Linking,
+  RefreshControl,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
+import {
+  fetchChannelVideos,
+  formatPublishedDate,
+  getRelativeTime,
+  YouTubeVideo,
+} from '@/src/services/youtube';
 
-const SAMPLE_SERMONS = [
-  {
-    id: '1',
-    title: 'PR | Rev. Reinoso Silva | 1 Coríntios 10.29-11.1 |',
-    subtitle: 'Culto Vespertino - 14/12/2025',
-    views: '44 visualizações',
-    time: 'Transmitido há 4 dias',
-  },
-  {
-    id: '2',
-    title: 'PR | Rev. Reinoso Silva | Atos 26.19-23 | Culto',
-    subtitle: 'Vespertino - 07/12/2025',
-    views: '31 visualizações',
-    time: 'Transmitido há 11 dias',
-  },
-];
+const CHANNEL_URL = 'https://www.youtube.com/@ipaldeia';
 
 export default function SermonsScreen() {
-  const [selectedMonth, setSelectedMonth] = useState('Dezembro');
-  const [selectedYear, setSelectedYear] = useState('2025');
+  const [videos, setVideos] = useState<YouTubeVideo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(false);
+
+  async function loadVideos() {
+    try {
+      setError(false);
+      const data = await fetchChannelVideos();
+      setVideos(data);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }
+
+  useEffect(() => {
+    loadVideos();
+  }, []);
+
+  function onRefresh() {
+    setRefreshing(true);
+    loadVideos();
+  }
+
+  function openVideo(url: string) {
+    Linking.openURL(url);
+  }
+
+  function openChannel() {
+    Linking.openURL(CHANNEL_URL);
+  }
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.liveBanner} activeOpacity={0.8}>
+      <TouchableOpacity style={styles.liveBanner} activeOpacity={0.8} onPress={openChannel}>
         <View style={styles.liveDot} />
         <Text style={styles.liveText}>AO VIVO</Text>
       </TouchableOpacity>
 
-      <View style={styles.filterRow}>
-        <TouchableOpacity style={styles.filterButton} activeOpacity={0.7}>
-          <Text style={styles.filterText}>{selectedMonth}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.filterButton} activeOpacity={0.7}>
-          <Text style={styles.filterText}>{selectedYear}</Text>
+      <View style={styles.channelRow}>
+        <Text style={styles.channelLabel}>Últimos vídeos do canal</Text>
+        <TouchableOpacity onPress={openChannel} activeOpacity={0.7}>
+          <Text style={styles.channelLink}>Ver canal</Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {SAMPLE_SERMONS.map((sermon) => (
-          <TouchableOpacity key={sermon.id} style={styles.card} activeOpacity={0.7}>
-            <View style={styles.cardImage}>
-              <View style={styles.cardImageOverlay}>
-                <Image
-                  source={require('../../assets/images_igreja/logo_igreja.jpg')}
-                  style={styles.cardLogo}
-                  resizeMode="contain"
-                />
-              </View>
-            </View>
-            <View style={styles.cardInfo}>
-              <Text style={styles.cardTitle} numberOfLines={2}>{sermon.title}</Text>
-              <Text style={styles.cardSubtitle}>{sermon.subtitle}</Text>
-              <Text style={styles.cardMeta}>{sermon.views} • {sermon.time}</Text>
-            </View>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#FFFFFF" />
+          <Text style={styles.loadingText}>Carregando vídeos...</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.loadingContainer}>
+          <Ionicons name="cloud-offline-outline" size={48} color="rgba(255,255,255,0.4)" />
+          <Text style={styles.errorText}>Não foi possível carregar os vídeos</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={loadVideos} activeOpacity={0.7}>
+            <Text style={styles.retryText}>Tentar novamente</Text>
           </TouchableOpacity>
-        ))}
-      </ScrollView>
+        </View>
+      ) : (
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#FFFFFF" />
+          }
+        >
+          {videos.map((video) => (
+            <TouchableOpacity
+              key={video.id}
+              style={styles.card}
+              activeOpacity={0.7}
+              onPress={() => openVideo(video.url)}
+            >
+              <View style={styles.cardImageContainer}>
+                <Image
+                  source={{ uri: video.thumbnail }}
+                  style={styles.cardImage}
+                  resizeMode="cover"
+                />
+                <View style={styles.playOverlay}>
+                  <Ionicons name="play-circle" size={48} color="rgba(255,255,255,0.85)" />
+                </View>
+              </View>
+              <View style={styles.cardInfo}>
+                <Text style={styles.cardTitle} numberOfLines={2}>{video.title}</Text>
+                <Text style={styles.cardMeta}>
+                  {formatPublishedDate(video.published)} • {getRelativeTime(video.published)}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+
+          <TouchableOpacity style={styles.moreButton} activeOpacity={0.7} onPress={openChannel}>
+            <Text style={styles.moreButtonText}>VER MAIS NO YOUTUBE</Text>
+            <Ionicons name="open-outline" size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
+          </TouchableOpacity>
+        </ScrollView>
+      )}
     </View>
   );
 }
@@ -96,20 +157,47 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1,
   },
-  filterRow: {
+  channelRow: {
     flexDirection: 'row',
-    gap: 10,
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 14,
     paddingBottom: 8,
   },
-  filterButton: {
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    paddingVertical: 8,
-    paddingHorizontal: 18,
-    borderRadius: 20,
+  channelLabel: {
+    color: 'rgba(255,255,255,0.7)',
+    fontSize: 13,
+    fontWeight: '600',
   },
-  filterText: {
+  channelLink: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12,
+    textDecorationLine: 'underline',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+  },
+  loadingText: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 14,
+  },
+  errorText: {
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 14,
+    marginTop: 8,
+  },
+  retryButton: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 20,
+    marginTop: 8,
+  },
+  retryText: {
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '600',
@@ -119,7 +207,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingTop: 4,
     paddingBottom: 32,
     gap: 14,
   },
@@ -128,39 +216,47 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     overflow: 'hidden',
   },
+  cardImageContainer: {
+    height: 180,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
   cardImage: {
-    height: 140,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    width: '100%',
+    height: '100%',
+  },
+  playOverlay: {
+    ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  cardImageOverlay: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    overflow: 'hidden',
-    opacity: 0.6,
-  },
-  cardLogo: {
-    width: 60,
-    height: 60,
+    backgroundColor: 'rgba(0,0,0,0.2)',
   },
   cardInfo: {
     padding: 12,
   },
   cardTitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     color: '#FFFFFF',
-    marginBottom: 2,
-  },
-  cardSubtitle: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.7)',
     marginBottom: 4,
+    lineHeight: 20,
   },
   cardMeta: {
-    fontSize: 11,
+    fontSize: 12,
     color: 'rgba(255,255,255,0.45)',
+  },
+  moreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    paddingVertical: 14,
+    borderRadius: 10,
+    marginTop: 4,
+  },
+  moreButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 1,
   },
 });
