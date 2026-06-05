@@ -13,72 +13,55 @@ import {
   Alert,
 } from 'react-native';
 import { router } from 'expo-router';
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { Ionicons } from '@expo/vector-icons';
 
 import { auth } from '../../src/services/firebase';
 import logoIgreja from '../../assets/images_igreja/logo_igreja.jpg';
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  async function handleLogin() {
-    if (!email.trim() || !password.trim()) {
+  async function handleRegister() {
+    if (!name.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
       Alert.alert('Atenção', 'Preencha todos os campos.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Atenção', 'As senhas não coincidem.');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Atenção', 'A senha deve ter pelo menos 6 caracteres.');
       return;
     }
 
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(auth, email.trim(), password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
+      await updateProfile(userCredential.user, { displayName: name.trim() });
       router.replace('/(main)');
     } catch (error: any) {
-      let message = 'Ocorreu um erro ao fazer login. Tente novamente.';
-      if (
-        error.code === 'auth/user-not-found' ||
-        error.code === 'auth/wrong-password' ||
-        error.code === 'auth/invalid-credential'
-      ) {
-        message = 'E-mail ou senha incorretos.';
+      let message = 'Ocorreu um erro ao criar a conta. Tente novamente.';
+      if (error.code === 'auth/email-already-in-use') {
+        message = 'Este e-mail já está em uso.';
       } else if (error.code === 'auth/invalid-email') {
         message = 'E-mail inválido.';
-      } else if (error.code === 'auth/too-many-requests') {
-        message = 'Muitas tentativas. Tente novamente mais tarde.';
+      } else if (error.code === 'auth/weak-password') {
+        message = 'A senha é muito fraca. Use pelo menos 6 caracteres.';
       }
       Alert.alert('Erro', message);
     } finally {
       setLoading(false);
     }
-  }
-
-  async function handleForgotPassword() {
-    if (!email.trim()) {
-      Alert.alert('Atenção', 'Digite seu e-mail para redefinir a senha.');
-      return;
-    }
-    try {
-      await sendPasswordResetEmail(auth, email.trim());
-      Alert.alert('Sucesso', 'E-mail de redefinição de senha enviado. Verifique sua caixa de entrada.');
-    } catch (error: any) {
-      let message = 'Erro ao enviar e-mail de redefinição.';
-      if (error.code === 'auth/user-not-found') {
-        message = 'Nenhuma conta encontrada com este e-mail.';
-      } else if (error.code === 'auth/invalid-email') {
-        message = 'E-mail inválido.';
-      }
-      Alert.alert('Erro', message);
-    }
-  }
-
-  function handleGmailLogin() {
-    Alert.alert('Google', 'Login com Google em breve.');
-  }
-
-  function handleFacebookLogin() {
-    Alert.alert('Facebook', 'Login com Facebook em breve.');
   }
 
   return (
@@ -92,7 +75,6 @@ export default function LoginScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.container}>
-          {/* Logo */}
           <View style={styles.logoContainer}>
             <Image
               source={logoIgreja}
@@ -101,15 +83,31 @@ export default function LoginScreen() {
             />
           </View>
 
-          {/* Welcome Text */}
-          <Text style={styles.title}>Bem-Vindo!</Text>
+          <Text style={styles.title}>Criar Conta</Text>
           <Text style={styles.subtitle}>
-            Tenha acesso a conteúdos e recursos que facilitam seu dia a dia com
-            a igreja
+            Preencha os dados abaixo para se cadastrar e ter acesso ao app da
+            igreja
           </Text>
 
-          {/* Form */}
           <View style={styles.form}>
+            <View style={styles.inputWrapper}>
+              <Ionicons
+                name="person-outline"
+                size={20}
+                color="#6B6B6B"
+                style={styles.inputIcon}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Nome completo"
+                placeholderTextColor="#9E9E9E"
+                autoCapitalize="words"
+                autoCorrect={false}
+                value={name}
+                onChangeText={setName}
+              />
+            </View>
+
             <View style={styles.inputWrapper}>
               <Ionicons
                 name="mail-outline"
@@ -157,68 +155,51 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity
-              style={styles.forgotPassword}
-              onPress={handleForgotPassword}
-            >
-              <Text style={styles.forgotPasswordText}>Esqueci a senha</Text>
-            </TouchableOpacity>
+            <View style={styles.inputWrapper}>
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color="#6B6B6B"
+                style={styles.inputIcon}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Confirmar senha"
+                placeholderTextColor="#9E9E9E"
+                secureTextEntry={!showConfirmPassword}
+                autoCapitalize="none"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+              />
+              <TouchableOpacity
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={styles.eyeButton}
+              >
+                <Ionicons
+                  name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={20}
+                  color="#6B6B6B"
+                />
+              </TouchableOpacity>
+            </View>
 
-            {/* Login Button */}
             <TouchableOpacity
               style={[styles.button, styles.primaryButton]}
-              onPress={handleLogin}
+              onPress={handleRegister}
               disabled={loading}
               activeOpacity={0.8}
             >
               {loading ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.primaryButtonText}>ENTRAR</Text>
+                <Text style={styles.primaryButtonText}>CADASTRAR</Text>
               )}
             </TouchableOpacity>
 
-            {/* Divider */}
-            <View style={styles.divider}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>ou</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            {/* Social Buttons */}
-            <TouchableOpacity
-              style={[styles.button, styles.socialButton]}
-              onPress={handleGmailLogin}
-              activeOpacity={0.8}
-            >
-              <Ionicons
-                name="logo-google"
-                size={20}
-                color="#3C4A3E"
-                style={styles.socialIcon}
-              />
-              <Text style={styles.socialButtonText}>ENTRAR COM GMAIL</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.button, styles.socialButton]}
-              onPress={handleFacebookLogin}
-              activeOpacity={0.8}
-            >
-              <Ionicons
-                name="logo-facebook"
-                size={20}
-                color="#3C4A3E"
-                style={styles.socialIcon}
-              />
-              <Text style={styles.socialButtonText}>ENTRAR COM FACEBOOK</Text>
-            </TouchableOpacity>
-
-            {/* Register Link */}
-            <View style={styles.registerLinkContainer}>
-              <Text style={styles.registerLinkText}>Não tem uma conta? </Text>
-              <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
-                <Text style={styles.registerLinkAction}>Cadastre-se</Text>
+            <View style={styles.loginLinkContainer}>
+              <Text style={styles.loginLinkText}>Já tem uma conta? </Text>
+              <TouchableOpacity onPress={() => router.back()}>
+                <Text style={styles.loginLinkAction}>Entrar</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -252,9 +233,9 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   logo: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
   title: {
     fontSize: 28,
@@ -296,15 +277,6 @@ const styles = StyleSheet.create({
   eyeButton: {
     padding: 4,
   },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 24,
-  },
-  forgotPasswordText: {
-    fontSize: 13,
-    color: '#6B6B6B',
-    textDecorationLine: 'underline',
-  },
   button: {
     width: '100%',
     height: 52,
@@ -312,6 +284,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row',
+    marginTop: 10,
   },
   primaryButton: {
     backgroundColor: '#3C4A3E',
@@ -323,47 +296,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1,
   },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#D4CFC8',
-  },
-  dividerText: {
-    marginHorizontal: 16,
-    fontSize: 13,
-    color: '#9E9E9E',
-  },
-  socialButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#D4CFC8',
-    marginBottom: 12,
-  },
-  socialIcon: {
-    marginRight: 10,
-  },
-  socialButtonText: {
-    color: '#3C4A3E',
-    fontSize: 14,
-    fontWeight: '600',
-    letterSpacing: 0.5,
-  },
-  registerLinkContainer: {
+  loginLinkContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 8,
   },
-  registerLinkText: {
+  loginLinkText: {
     fontSize: 14,
     color: '#6B6B6B',
   },
-  registerLinkAction: {
+  loginLinkAction: {
     fontSize: 14,
     fontWeight: '700',
     color: '#3C4A3E',
