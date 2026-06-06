@@ -11,10 +11,11 @@ import {
   ScrollView,
 } from 'react-native';
 import { AppColors } from '@/constants/theme';
-import { useThemeColors } from '@/src/contexts/SettingsContext';
+import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
 
 export default function PrayersScreen() {
   const colors = useThemeColors();
+  const { fontSize } = useSettings();
   const [motivo, setMotivo] = useState('');
 
   const handleSubmit = () => {
@@ -38,7 +39,7 @@ export default function PrayersScreen() {
         <Text style={[styles.label, { color: colors.text }]}>Motivo:</Text>
 
         <TextInput
-          style={[styles.textInput, { borderBottomColor: colors.border, color: colors.text }]}
+          style={[styles.textInput, { borderBottomColor: colors.border, color: colors.text, fontSize }]}
           multiline
           numberOfLines={8}
           placeholder="Escreva seu pedido de oração aqui..."

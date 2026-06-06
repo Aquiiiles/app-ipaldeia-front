@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
-import { useThemeColors } from '@/src/contexts/SettingsContext';
+import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
 import { isAdmin } from '@/src/services/admin';
 import { fetchEvents, addEvent, updateEvent, deleteEvent, EventItem } from '@/src/services/firestore';
 import Toast from '@/components/Toast';
@@ -21,6 +21,7 @@ type TabKey = 'geral' | 'aniversariantes';
 
 export default function AgendaScreen() {
   const colors = useThemeColors();
+  const { fontSize } = useSettings();
   const [activeTab, setActiveTab] = useState<TabKey>('geral');
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -118,7 +119,7 @@ export default function AgendaScreen() {
         onPress={() => admin && openEditEvent(item)}
       >
         <Text style={[styles.date, { color: colors.text }]}>{item.date}</Text>
-        <Text style={[styles.label, { color: colors.text }]}>{item.title}</Text>
+        <Text style={[styles.label, { color: colors.text, fontSize }]}>{item.title}</Text>
         {admin && (
           <TouchableOpacity onPress={() => setShowDeleteConfirm(item.id)} style={styles.rowDeleteBtn}>
             <Ionicons name="trash-outline" size={16} color={colors.textSecondary} />

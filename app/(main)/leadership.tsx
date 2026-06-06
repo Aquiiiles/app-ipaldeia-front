@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
-import { useThemeColors } from '@/src/contexts/SettingsContext';
+import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
 
 type TabKey = 'pastores' | 'presbiteros' | 'diaconos';
 
@@ -26,6 +26,7 @@ const LEADERS: Record<TabKey, string[]> = {
 
 export default function LeadershipScreen() {
   const colors = useThemeColors();
+  const { fontSize } = useSettings();
   const [activeTab, setActiveTab] = useState<TabKey>('pastores');
 
   const leaders = LEADERS[activeTab];
@@ -56,7 +57,7 @@ export default function LeadershipScreen() {
             <View style={styles.avatar}>
               <Ionicons name="camera-outline" size={22} color={colors.textSecondary} />
             </View>
-            <Text style={[styles.leaderName, { color: colors.text }]}>{name}</Text>
+            <Text style={[styles.leaderName, { color: colors.text, fontSize }]}>{name}</Text>
           </View>
         ))}
       </ScrollView>

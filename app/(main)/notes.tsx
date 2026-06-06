@@ -12,7 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppColors } from '@/constants/theme';
-import { useThemeColors } from '@/src/contexts/SettingsContext';
+import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
 import Toast from '@/components/Toast';
 
 const STORAGE_KEY = '@ipaldeia_notes';
@@ -28,6 +28,7 @@ type Note = {
 
 export default function NotesScreen() {
   const colors = useThemeColors();
+  const { fontSize } = useSettings();
   const [notes, setNotes] = useState<Note[]>([]);
   const [pregador, setPregador] = useState('');
   const [texto, setTexto] = useState('');
@@ -164,7 +165,7 @@ export default function NotesScreen() {
                         <Text style={[styles.noteCardPregador, { color: colors.primaryDark }]} numberOfLines={1}>{item.pregador}</Text>
                       ) : null}
                       {item.texto ? (
-                        <Text style={[styles.noteCardTexto, { color: colors.textSecondary }]} numberOfLines={1}>{item.texto}</Text>
+                        <Text style={[styles.noteCardTexto, { color: colors.textSecondary, fontSize: fontSize - 2 }]} numberOfLines={1}>{item.texto}</Text>
                       ) : null}
                     </View>
                     <TouchableOpacity onPress={() => setShowDeleteConfirm(item.id)} style={styles.deleteBtn}>
@@ -213,7 +214,7 @@ export default function NotesScreen() {
 
           <Text style={[styles.label, { color: colors.text }]}>Texto:</Text>
           <TextInput
-            style={[styles.input, { borderBottomColor: colors.border, color: colors.text }]}
+            style={[styles.input, { borderBottomColor: colors.border, color: colors.text, fontSize }]}
             value={texto}
             onChangeText={setTexto}
             placeholder="Referência bíblica"

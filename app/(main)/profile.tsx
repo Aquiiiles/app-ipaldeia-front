@@ -18,7 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { signOut, updateProfile } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { AppColors } from '@/constants/theme';
-import { useThemeColors } from '@/src/contexts/SettingsContext';
+import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
 import { auth, db } from '../../src/services/firebase';
 import { isAdmin } from '@/src/services/admin';
 import Toast from '@/components/Toast';
@@ -41,6 +41,7 @@ const MENU_ITEMS: MenuItem[] = [
 
 export default function ProfileScreen() {
   const colors = useThemeColors();
+  const { fontSize } = useSettings();
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
@@ -212,7 +213,7 @@ export default function ProfileScreen() {
             <Ionicons name="pencil" size={12} color="#FFFFFF" />
           </View>
         </TouchableOpacity>
-        <Text style={[styles.userName, { color: colors.primaryDark }]}>{userName || 'Seu nome'}</Text>
+        <Text style={[styles.userName, { color: colors.primaryDark, fontSize }]}>{userName || 'Seu nome'}</Text>
         <Text style={[styles.userEmail, { color: colors.textSecondary }]}>{userEmail}</Text>
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{admin ? 'Admin' : 'Membro'}</Text>

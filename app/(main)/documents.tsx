@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
-import { useThemeColors } from '@/src/contexts/SettingsContext';
+import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -60,6 +60,7 @@ const DOCUMENTS: Document[] = [
 
 export default function DocumentsScreen() {
   const colors = useThemeColors();
+  const { fontSize } = useSettings();
 
   function handlePress(doc: Document) {
     Linking.openURL(doc.url);
@@ -82,7 +83,7 @@ export default function DocumentsScreen() {
             <Ionicons name={doc.icon} size={22} color={colors.text} />
           </View>
           <View style={styles.cardContent}>
-            <Text style={[styles.cardTitle, { color: colors.text }]}>{doc.title}</Text>
+            <Text style={[styles.cardTitle, { color: colors.text, fontSize }]}>{doc.title}</Text>
             <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>{doc.subtitle}</Text>
           </View>
           <Ionicons name="open-outline" size={16} color={colors.textSecondary} />

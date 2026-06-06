@@ -8,13 +8,14 @@ import {
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { AppColors } from '@/constants/theme';
-import { useThemeColors } from '@/src/contexts/SettingsContext';
+import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
 import { useState } from 'react';
 
 const PIX_KEY = '12.345.678/0001-90';
 
 export default function DonationsScreen() {
   const colors = useThemeColors();
+  const { fontSize } = useSettings();
   const [copied, setCopied] = useState(false);
 
   const handleCopyPix = async () => {
@@ -43,19 +44,19 @@ export default function DonationsScreen() {
 
         <View style={styles.row}>
           <Text style={[styles.rowLabel, { color: colors.text }]}>Banco:</Text>
-          <Text style={[styles.rowValue, { color: colors.textSecondary }]}>Banco do Brasil</Text>
+          <Text style={[styles.rowValue, { color: colors.textSecondary, fontSize }]}>Banco do Brasil</Text>
         </View>
         <View style={styles.row}>
           <Text style={[styles.rowLabel, { color: colors.text }]}>Agência:</Text>
-          <Text style={[styles.rowValue, { color: colors.textSecondary }]}>1234-5</Text>
+          <Text style={[styles.rowValue, { color: colors.textSecondary, fontSize }]}>1234-5</Text>
         </View>
         <View style={styles.row}>
           <Text style={[styles.rowLabel, { color: colors.text }]}>Conta:</Text>
-          <Text style={[styles.rowValue, { color: colors.textSecondary }]}>12345-6</Text>
+          <Text style={[styles.rowValue, { color: colors.textSecondary, fontSize }]}>12345-6</Text>
         </View>
         <View style={styles.row}>
           <Text style={[styles.rowLabel, { color: colors.text }]}>CNPJ:</Text>
-          <Text style={[styles.rowValue, { color: colors.textSecondary }]}>12.345.678/0001-90</Text>
+          <Text style={[styles.rowValue, { color: colors.textSecondary, fontSize }]}>12.345.678/0001-90</Text>
         </View>
       </View>
 

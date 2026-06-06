@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
-import { useThemeColors } from '@/src/contexts/SettingsContext';
+import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
 import { BIBLE_BOOKS, BIBLE_VERSIONS, BibleVersion } from '@/constants/bibleBooks';
 
 type BibleBookData = {
@@ -41,6 +41,7 @@ function loadBibleData(version: BibleVersion): BibleBookData[] {
 
 export default function BibleScreen() {
   const colors = useThemeColors();
+  const { fontSize } = useSettings();
   const [version, setVersion] = useState<BibleVersion>('ARA');
   const [bookIndex, setBookIndex] = useState(0);
   const [chapter, setChapter] = useState(0);
@@ -147,7 +148,7 @@ export default function BibleScreen() {
           showsVerticalScrollIndicator={false}
         >
           {verses.map((verse, index) => (
-            <Text key={index} style={[styles.verseText, { color: colors.text }]}>
+            <Text key={index} style={[styles.verseText, { color: colors.text, fontSize, lineHeight: fontSize * 1.6 }]}>
               <Text style={[styles.verseNumber, { color: colors.primaryDark }]}>{index + 1} </Text>
               {verse}
             </Text>

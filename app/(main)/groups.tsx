@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
-import { useThemeColors } from '@/src/contexts/SettingsContext';
+import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
 import Toast from '@/components/Toast';
 import { useState } from 'react';
 
@@ -23,6 +23,7 @@ const GROUPS: Group[] = [
 
 export default function GroupsScreen() {
   const colors = useThemeColors();
+  const { fontSize } = useSettings();
   const [toast, setToast] = useState({ visible: false, message: '', type: 'warning' as 'success' | 'error' | 'warning' });
 
   function handlePress(name: string) {
@@ -45,7 +46,7 @@ export default function GroupsScreen() {
             </View>
           </View>
         </View>
-        <Text style={[styles.groupName, { color: colors.textSecondary }]}>{item.name}</Text>
+        <Text style={[styles.groupName, { color: colors.textSecondary, fontSize }]}>{item.name}</Text>
       </TouchableOpacity>
     </View>
   );
