@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
+import { useThemeColors } from '@/src/contexts/SettingsContext';
 import { isAdmin } from '@/src/services/admin';
 import { fetchNews, addNews, updateNews, deleteNews, NewsItem } from '@/src/services/firestore';
 import Toast from '@/components/Toast';
@@ -55,6 +56,8 @@ export default function HomeScreen() {
   const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' | 'warning' });
+
+  const colors = useThemeColors();
 
   function showToast(message: string, type: 'success' | 'error' | 'warning' = 'success') {
     setToast({ visible: true, message, type });
@@ -130,10 +133,10 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.headerBg }]}>
       <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={() => setToast(p => ({ ...p, visible: false }))} />
 
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.headerBg }]}>
         <TouchableOpacity
           style={styles.headerButton}
           onPress={() => router.push('/(main)/profile')}
@@ -148,13 +151,13 @@ export default function HomeScreen() {
           resizeMode="contain"
         />
 
-        <TouchableOpacity style={styles.headerButton} activeOpacity={0.7}>
+        <TouchableOpacity style={styles.headerButton} activeOpacity={0.7} onPress={() => router.push('/(main)/settings')}>
           <Ionicons name="settings-outline" size={22} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 
       <ScrollView
-        style={styles.scrollView}
+        style={[styles.scrollView, { backgroundColor: colors.background }]}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -167,28 +170,28 @@ export default function HomeScreen() {
             style={styles.centerLogo}
             resizeMode="contain"
           />
-          <Text style={styles.churchName}>IGREJA{'\n'}PRESBITERIANA{'\n'}DE ALDEIA</Text>
+          <Text style={[styles.churchName, { color: colors.primaryDark }]}>IGREJA{'\n'}PRESBITERIANA{'\n'}DE ALDEIA</Text>
         </View>
 
         <View style={styles.grid}>
           {features.map((item, index) => (
             <TouchableOpacity
               key={index}
-              style={styles.card}
+              style={[styles.card, { backgroundColor: colors.card }]}
               activeOpacity={0.7}
               onPress={() => router.push(item.route as any)}
             >
               <View style={styles.iconCircle}>
-                <Ionicons name={item.icon} size={26} color={AppColors.primaryDark} />
+                <Ionicons name={item.icon} size={26} color={colors.primaryDark} />
               </View>
-              <Text style={styles.cardLabel}>{item.label}</Text>
+              <Text style={[styles.cardLabel, { color: colors.primaryDark }]}>{item.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
         <View style={styles.newsSection}>
           <View style={styles.newsSectionHeader}>
-            <Text style={styles.sectionTitle}>Notícias</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>Notícias</Text>
             {admin && (
               <TouchableOpacity onPress={openNewNews} activeOpacity={0.7}>
                 <Ionicons name="add-circle" size={26} color={AppColors.primaryDark} />
@@ -207,7 +210,7 @@ export default function HomeScreen() {
             news.map((item) => (
               <TouchableOpacity
                 key={item.id}
-                style={styles.newsCard}
+                style={[styles.newsCard, { backgroundColor: colors.card }]}
                 activeOpacity={admin ? 0.7 : 1}
                 onPress={() => admin && openEditNews(item)}
               >
