@@ -138,6 +138,15 @@ export default function ProfileScreen() {
     });
   }
 
+  function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+    return Promise.race([
+      promise,
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('TIMEOUT')), ms)
+      ),
+    ]);
+  }
+
   async function handlePickPhoto() {
     const user = auth.currentUser;
     if (!user) return;
@@ -148,15 +157,17 @@ export default function ProfileScreen() {
 
       setUploadingPhoto(true);
       const storageRef = ref(storage, `profile_photos/${user.uid}.jpg`);
-      await uploadBytes(storageRef, blob);
-      const downloadURL = await getDownloadURL(storageRef);
+      await withTimeout(uploadBytes(storageRef, blob), 15000);
+      const downloadURL = await withTimeout(getDownloadURL(storageRef), 10000);
       await updateProfile(user, { photoURL: downloadURL });
       setUserPhoto(downloadURL);
       showToast('Foto atualizada!', 'success');
     } catch (error: any) {
       console.log('Photo upload error:', error?.code || error?.message || error);
-      if (error?.code?.startsWith?.('storage/')) {
-        showToast('Ative o Firebase Storage no console.', 'warning');
+      if (error?.message === 'TIMEOUT') {
+        showToast('Upload demorou demais. Verifique se o Firebase Storage está ativado no console.', 'warning');
+      } else if (error?.code?.startsWith?.('storage/')) {
+        showToast('Ative o Firebase Storage no console do Firebase.', 'warning');
       } else {
         showToast('Erro ao enviar foto. Tente novamente.', 'error');
       }
