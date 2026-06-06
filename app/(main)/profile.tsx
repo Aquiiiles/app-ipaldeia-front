@@ -16,9 +16,9 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { signOut, updateProfile } from 'firebase/auth';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { AppColors } from '@/constants/theme';
-import { auth, storage } from '../../src/services/firebase';
+import { auth, db } from '../../src/services/firebase';
 import { isAdmin } from '@/src/services/admin';
 import Toast from '@/components/Toast';
 
@@ -65,6 +65,10 @@ export default function ProfileScreen() {
       setUserName(user.displayName || '');
       setUserEmail(user.email || '');
       setUserPhoto(user.photoURL);
+      getDoc(doc(db, 'usuarios', user.uid)).then((snap) => {
+        const data = snap.data();
+        if (data?.fotoBase64) setUserPhoto(data.fotoBase64);
+      }).catch(() => {});
     }
     setAdmin(isAdmin());
   }, []);
@@ -125,7 +129,7 @@ export default function ProfileScreen() {
     }
   }
 
-  function pickPhoto(): Promise<Blob | null> {
+  function pickPhoto(): Promise<File | null> {
     return new Promise((resolve) => {
       const input = document.createElement('input');
       input.type = 'file';
@@ -138,13 +142,24 @@ export default function ProfileScreen() {
     });
   }
 
-  function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-    return Promise.race([
-      promise,
-      new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('TIMEOUT')), ms)
-      ),
-    ]);
+  function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      const img = new window.Image();
+      img.onload = () => {
+        const MAX = 256;
+        let w = img.width;
+        let h = img.height;
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
   }
 
   async function handlePickPhoto() {
@@ -152,25 +167,18 @@ export default function ProfileScreen() {
     if (!user) return;
 
     try {
-      const blob = await pickPhoto();
-      if (!blob) return;
+      const file = await pickPhoto();
+      if (!file) return;
 
       setUploadingPhoto(true);
-      const storageRef = ref(storage, `profile_photos/${user.uid}.jpg`);
-      await withTimeout(uploadBytes(storageRef, blob), 15000);
-      const downloadURL = await withTimeout(getDownloadURL(storageRef), 10000);
-      await updateProfile(user, { photoURL: downloadURL });
-      setUserPhoto(downloadURL);
+      const base64 = await fileToBase64(file);
+      await setDoc(doc(db, 'usuarios', user.uid), { fotoBase64: base64 }, { merge: true });
+      await updateProfile(user, { photoURL: base64 });
+      setUserPhoto(base64);
       showToast('Foto atualizada!', 'success');
     } catch (error: any) {
       console.log('Photo upload error:', error?.code || error?.message || error);
-      if (error?.message === 'TIMEOUT') {
-        showToast('Upload demorou demais. Verifique se o Firebase Storage está ativado no console.', 'warning');
-      } else if (error?.code?.startsWith?.('storage/')) {
-        showToast('Ative o Firebase Storage no console do Firebase.', 'warning');
-      } else {
-        showToast('Erro ao enviar foto. Tente novamente.', 'error');
-      }
+      showToast('Erro ao enviar foto. Tente novamente.', 'error');
     } finally {
       setUploadingPhoto(false);
     }
