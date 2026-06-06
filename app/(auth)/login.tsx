@@ -103,13 +103,15 @@ export default function LoginScreen() {
       await signInWithPopup(auth, googleProvider);
       router.replace('/(main)');
     } catch (error: any) {
-      console.log('Google login error:', error.code);
+      console.log('Google login error:', error.code, error.message);
       if (error.code === 'auth/popup-closed-by-user') {
         // user closed, do nothing
       } else if (error.code === 'auth/cancelled-popup-request') {
         // duplicate popup, ignore
+      } else if (error.code === 'auth/unauthorized-domain') {
+        showToast('Domínio não autorizado. Adicione este domínio no Firebase Console → Authentication → Settings → Authorized domains.', 'warning');
       } else {
-        showToast('Erro ao fazer login com Google.');
+        showToast(`Erro ao fazer login com Google. (${error.code || 'unknown'})`, 'error');
       }
     } finally {
       setGoogleLoading(false);
