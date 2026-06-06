@@ -73,12 +73,12 @@ export default function RegisterScreen() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
       await updateProfile(userCredential.user, { displayName: name.trim() });
-      await setDoc(doc(db, 'usuarios', userCredential.user.uid), {
+      setDoc(doc(db, 'usuarios', userCredential.user.uid), {
         nome: name.trim(),
         email: email.trim(),
         telefone: phoneDigits,
         criadoEm: new Date().toISOString(),
-      });
+      }).catch((e) => console.log('Firestore save skipped:', e?.message));
       router.replace('/(main)');
     } catch (error: any) {
       console.log('Register error:', error.code);
