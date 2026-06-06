@@ -125,7 +125,7 @@ export default function ProfileScreen() {
     }
   }
 
-  function pickPhotoWeb(): Promise<Blob | null> {
+  function pickPhoto(): Promise<Blob | null> {
     return new Promise((resolve) => {
       const input = document.createElement('input');
       input.type = 'file';
@@ -143,28 +143,7 @@ export default function ProfileScreen() {
     if (!user) return;
 
     try {
-      let blob: Blob | null = null;
-
-      if (Platform.OS === 'web') {
-        blob = await pickPhotoWeb();
-      } else {
-        const ImagePicker = require('expo-image-picker');
-        const permResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (!permResult.granted) {
-          showToast('Permissão para acessar fotos negada.', 'warning');
-          return;
-        }
-        const result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ['images'],
-          allowsEditing: true,
-          aspect: [1, 1],
-          quality: 0.7,
-        });
-        if (result.canceled || !result.assets?.[0]?.uri) return;
-        const response = await fetch(result.assets[0].uri);
-        blob = await response.blob();
-      }
-
+      const blob = await pickPhoto();
       if (!blob) return;
 
       setUploadingPhoto(true);
