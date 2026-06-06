@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
+import { useThemeColors } from '@/src/contexts/SettingsContext';
 import Toast from '@/components/Toast';
 import { useState } from 'react';
 
@@ -21,6 +22,7 @@ const GROUPS: Group[] = [
 ];
 
 export default function GroupsScreen() {
+  const colors = useThemeColors();
   const [toast, setToast] = useState({ visible: false, message: '', type: 'warning' as 'success' | 'error' | 'warning' });
 
   function handlePress(name: string) {
@@ -29,27 +31,27 @@ export default function GroupsScreen() {
 
   const renderItem = ({ item, index }: { item: Group; index: number }) => (
     <View>
-      {index > 0 && <View style={styles.divider} />}
+      {index > 0 && <View style={[styles.divider, { backgroundColor: colors.border }]} />}
       <TouchableOpacity
         style={styles.row}
         onPress={() => handlePress(item.name)}
         activeOpacity={0.7}
       >
         <View style={styles.shieldContainer}>
-          <View style={styles.shield}>
-            <View style={styles.shieldTop} />
+          <View style={[styles.shield, { borderColor: colors.border }]}>
+            <View style={[styles.shieldTop, { borderBottomColor: colors.border }]} />
             <View style={styles.shieldIconArea}>
-              <Ionicons name={item.icon} size={28} color="#8a8a7a" />
+              <Ionicons name={item.icon} size={28} color={colors.textSecondary} />
             </View>
           </View>
         </View>
-        <Text style={styles.groupName}>{item.name}</Text>
+        <Text style={[styles.groupName, { color: colors.textSecondary }]}>{item.name}</Text>
       </TouchableOpacity>
     </View>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Toast
         visible={toast.visible}
         message={toast.message}

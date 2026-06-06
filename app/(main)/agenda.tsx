@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
+import { useThemeColors } from '@/src/contexts/SettingsContext';
 import { isAdmin } from '@/src/services/admin';
 import { fetchEvents, addEvent, updateEvent, deleteEvent, EventItem } from '@/src/services/firestore';
 import Toast from '@/components/Toast';
@@ -19,6 +20,7 @@ import Toast from '@/components/Toast';
 type TabKey = 'geral' | 'aniversariantes';
 
 export default function AgendaScreen() {
+  const colors = useThemeColors();
   const [activeTab, setActiveTab] = useState<TabKey>('geral');
   const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -115,20 +117,20 @@ export default function AgendaScreen() {
         activeOpacity={admin ? 0.7 : 1}
         onPress={() => admin && openEditEvent(item)}
       >
-        <Text style={styles.date}>{item.date}</Text>
-        <Text style={styles.label}>{item.title}</Text>
+        <Text style={[styles.date, { color: colors.text }]}>{item.date}</Text>
+        <Text style={[styles.label, { color: colors.text }]}>{item.title}</Text>
         {admin && (
           <TouchableOpacity onPress={() => setShowDeleteConfirm(item.id)} style={styles.rowDeleteBtn}>
-            <Ionicons name="trash-outline" size={16} color="rgba(255,255,255,0.5)" />
+            <Ionicons name="trash-outline" size={16} color={colors.textSecondary} />
           </TouchableOpacity>
         )}
       </TouchableOpacity>
-      {index < filteredEvents.length - 1 && <View style={styles.divider} />}
+      {index < filteredEvents.length - 1 && <View style={[styles.divider, { backgroundColor: colors.border }]} />}
     </View>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.headerBg }]}>
       <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={() => setToast(p => ({ ...p, visible: false }))} />
 
       <View style={styles.tabBar}>
@@ -181,51 +183,51 @@ export default function AgendaScreen() {
       {/* Event Form Modal */}
       <Modal visible={showForm} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{editingEvent ? 'Editar Evento' : 'Novo Evento'}</Text>
+          <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>{editingEvent ? 'Editar Evento' : 'Novo Evento'}</Text>
               <TouchableOpacity onPress={() => setShowForm(false)}>
-                <Ionicons name="close" size={24} color={AppColors.text} />
+                <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
             <View style={styles.modalContent}>
-              <Text style={styles.fieldLabel}>Tipo</Text>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Tipo</Text>
               <View style={styles.typeRow}>
                 <TouchableOpacity
-                  style={[styles.typeBtn, formType === 'geral' && styles.typeBtnActive]}
+                  style={[styles.typeBtn, { borderColor: colors.border }, formType === 'geral' && styles.typeBtnActive]}
                   onPress={() => setFormType('geral')}
                   activeOpacity={0.7}
                 >
-                  <Text style={[styles.typeBtnText, formType === 'geral' && styles.typeBtnTextActive]}>Geral</Text>
+                  <Text style={[styles.typeBtnText, { color: colors.text }, formType === 'geral' && styles.typeBtnTextActive]}>Geral</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.typeBtn, formType === 'aniversariante' && styles.typeBtnActive]}
+                  style={[styles.typeBtn, { borderColor: colors.border }, formType === 'aniversariante' && styles.typeBtnActive]}
                   onPress={() => setFormType('aniversariante')}
                   activeOpacity={0.7}
                 >
-                  <Text style={[styles.typeBtnText, formType === 'aniversariante' && styles.typeBtnTextActive]}>Aniversariante</Text>
+                  <Text style={[styles.typeBtnText, { color: colors.text }, formType === 'aniversariante' && styles.typeBtnTextActive]}>Aniversariante</Text>
                 </TouchableOpacity>
               </View>
 
-              <Text style={styles.fieldLabel}>Data (ex: 27/11 ou 10/1)</Text>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Data (ex: 27/11 ou 10/1)</Text>
               <TextInput
-                style={styles.fieldInput}
+                style={[styles.fieldInput, { borderBottomColor: colors.border, color: colors.text }]}
                 value={formDate}
                 onChangeText={setFormDate}
                 placeholder="DD/MM"
-                placeholderTextColor="#a0a090"
+                placeholderTextColor={colors.textSecondary}
               />
 
-              <Text style={styles.fieldLabel}>{formType === 'aniversariante' ? 'Nome' : 'Título do evento'}</Text>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{formType === 'aniversariante' ? 'Nome' : 'Título do evento'}</Text>
               <TextInput
-                style={styles.fieldInput}
+                style={[styles.fieldInput, { borderBottomColor: colors.border, color: colors.text }]}
                 value={formTitle}
                 onChangeText={setFormTitle}
                 placeholder={formType === 'aniversariante' ? 'Nome da pessoa' : 'Ex: ALMOÇO'}
-                placeholderTextColor="#a0a090"
+                placeholderTextColor={colors.textSecondary}
               />
 
-              <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={saving} activeOpacity={0.8}>
+              <TouchableOpacity style={[styles.saveButton, { backgroundColor: colors.primaryDark }]} onPress={handleSave} disabled={saving} activeOpacity={0.8}>
                 {saving ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.saveButtonText}>SALVAR</Text>}
               </TouchableOpacity>
             </View>
@@ -236,12 +238,12 @@ export default function AgendaScreen() {
       {/* Delete Confirm */}
       <Modal visible={showDeleteConfirm !== null} animationType="fade" transparent>
         <TouchableOpacity style={styles.confirmOverlay} activeOpacity={1} onPress={() => setShowDeleteConfirm(null)}>
-          <View style={styles.confirmModal}>
-            <Text style={styles.confirmTitle}>Excluir evento?</Text>
-            <Text style={styles.confirmDesc}>Esta ação não pode ser desfeita.</Text>
+          <View style={[styles.confirmModal, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.confirmTitle, { color: colors.primaryDark }]}>Excluir evento?</Text>
+            <Text style={[styles.confirmDesc, { color: colors.textSecondary }]}>Esta ação não pode ser desfeita.</Text>
             <View style={styles.confirmButtons}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowDeleteConfirm(null)} activeOpacity={0.7}>
-                <Text style={styles.cancelBtnText}>Cancelar</Text>
+              <TouchableOpacity style={[styles.cancelBtn, { borderColor: colors.border }]} onPress={() => setShowDeleteConfirm(null)} activeOpacity={0.7}>
+                <Text style={[styles.cancelBtnText, { color: colors.text }]}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.confirmDeleteBtn} onPress={() => showDeleteConfirm && handleDelete(showDeleteConfirm)} activeOpacity={0.7}>
                 <Text style={styles.confirmDeleteText}>Excluir</Text>

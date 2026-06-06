@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
+import { useThemeColors } from '@/src/contexts/SettingsContext';
 
 type IoniconsName = React.ComponentProps<typeof Ionicons>['name'];
 
@@ -58,31 +59,33 @@ const DOCUMENTS: Document[] = [
 ];
 
 export default function DocumentsScreen() {
+  const colors = useThemeColors();
+
   function handlePress(doc: Document) {
     Linking.openURL(doc.url);
   }
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.headerBg }]}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
       {DOCUMENTS.map((doc, index) => (
         <TouchableOpacity
           key={doc.title}
-          style={[styles.card, index === DOCUMENTS.length - 1 && { marginBottom: 0 }]}
+          style={[styles.card, { backgroundColor: colors.card }, index === DOCUMENTS.length - 1 && { marginBottom: 0 }]}
           onPress={() => handlePress(doc)}
           activeOpacity={0.7}
         >
           <View style={styles.iconContainer}>
-            <Ionicons name={doc.icon} size={22} color="#FFFFFF" />
+            <Ionicons name={doc.icon} size={22} color={colors.text} />
           </View>
           <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>{doc.title}</Text>
-            <Text style={styles.cardSubtitle}>{doc.subtitle}</Text>
+            <Text style={[styles.cardTitle, { color: colors.text }]}>{doc.title}</Text>
+            <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>{doc.subtitle}</Text>
           </View>
-          <Ionicons name="open-outline" size={16} color="rgba(255,255,255,0.4)" />
+          <Ionicons name="open-outline" size={16} color={colors.textSecondary} />
         </TouchableOpacity>
       ))}
     </ScrollView>

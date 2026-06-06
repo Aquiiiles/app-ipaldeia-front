@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
+import { useThemeColors } from '@/src/contexts/SettingsContext';
 import { BIBLE_BOOKS, BIBLE_VERSIONS, BibleVersion } from '@/constants/bibleBooks';
 
 type BibleBookData = {
@@ -39,6 +40,7 @@ function loadBibleData(version: BibleVersion): BibleBookData[] {
 }
 
 export default function BibleScreen() {
+  const colors = useThemeColors();
   const [version, setVersion] = useState<BibleVersion>('ARA');
   const [bookIndex, setBookIndex] = useState(0);
   const [chapter, setChapter] = useState(0);
@@ -105,10 +107,10 @@ export default function BibleScreen() {
   const hasNext = bookIndex < BIBLE_BOOKS.length - 1 || chapter < currentBook.chapters - 1;
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.selectorRow}>
         <TouchableOpacity
-          style={styles.selectorButton}
+          style={[styles.selectorButton, { backgroundColor: colors.primaryDark }]}
           onPress={() => setShowBookPicker(true)}
           activeOpacity={0.7}
         >
@@ -116,7 +118,7 @@ export default function BibleScreen() {
           <Ionicons name="chevron-down" size={14} color={AppColors.textLight} style={{ marginLeft: 4 }} />
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.selectorButton}
+          style={[styles.selectorButton, { backgroundColor: colors.primaryDark }]}
           onPress={() => setShowChapterPicker(true)}
           activeOpacity={0.7}
         >
@@ -125,18 +127,18 @@ export default function BibleScreen() {
         </TouchableOpacity>
         <View style={{ flex: 1 }} />
         <TouchableOpacity
-          style={styles.versionButton}
+          style={[styles.versionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
           onPress={() => setShowVersionPicker(true)}
           activeOpacity={0.7}
         >
-          <Text style={styles.versionText}>{version}</Text>
-          <Ionicons name="chevron-down" size={12} color={AppColors.primaryDark} style={{ marginLeft: 3 }} />
+          <Text style={[styles.versionText, { color: colors.primaryDark }]}>{version}</Text>
+          <Ionicons name="chevron-down" size={12} color={colors.primaryDark} style={{ marginLeft: 3 }} />
         </TouchableOpacity>
       </View>
 
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={AppColors.primaryDark} />
+          <ActivityIndicator size="large" color={colors.primaryDark} />
         </View>
       ) : (
         <ScrollView
@@ -145,62 +147,62 @@ export default function BibleScreen() {
           showsVerticalScrollIndicator={false}
         >
           {verses.map((verse, index) => (
-            <Text key={index} style={styles.verseText}>
-              <Text style={styles.verseNumber}>{index + 1} </Text>
+            <Text key={index} style={[styles.verseText, { color: colors.text }]}>
+              <Text style={[styles.verseNumber, { color: colors.primaryDark }]}>{index + 1} </Text>
               {verse}
             </Text>
           ))}
         </ScrollView>
       )}
 
-      <View style={styles.navBar}>
+      <View style={[styles.navBar, { borderTopColor: colors.border, backgroundColor: colors.background }]}>
         <TouchableOpacity
           style={[styles.navButton, !hasPrev && styles.navButtonDisabled]}
           onPress={goToPrevChapter}
           disabled={!hasPrev}
           activeOpacity={0.7}
         >
-          <Ionicons name="chevron-back" size={20} color={hasPrev ? AppColors.primaryDark : AppColors.border} />
-          <Text style={[styles.navButtonText, !hasPrev && styles.navButtonTextDisabled]}>Anterior</Text>
+          <Ionicons name="chevron-back" size={20} color={hasPrev ? colors.primaryDark : colors.border} />
+          <Text style={[styles.navButtonText, { color: colors.primaryDark }, !hasPrev && { color: colors.border }]}>Anterior</Text>
         </TouchableOpacity>
-        <Text style={styles.navInfo}>{currentBook.name} {chapter + 1}</Text>
+        <Text style={[styles.navInfo, { color: colors.textSecondary }]}>{currentBook.name} {chapter + 1}</Text>
         <TouchableOpacity
           style={[styles.navButton, !hasNext && styles.navButtonDisabled]}
           onPress={goToNextChapter}
           disabled={!hasNext}
           activeOpacity={0.7}
         >
-          <Text style={[styles.navButtonText, !hasNext && styles.navButtonTextDisabled]}>Próximo</Text>
-          <Ionicons name="chevron-forward" size={20} color={hasNext ? AppColors.primaryDark : AppColors.border} />
+          <Text style={[styles.navButtonText, { color: colors.primaryDark }, !hasNext && { color: colors.border }]}>Próximo</Text>
+          <Ionicons name="chevron-forward" size={20} color={hasNext ? colors.primaryDark : colors.border} />
         </TouchableOpacity>
       </View>
 
       {/* Book Picker Modal */}
       <Modal visible={showBookPicker} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Selecionar Livro</Text>
+          <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Selecionar Livro</Text>
               <TouchableOpacity onPress={() => setShowBookPicker(false)}>
-                <Ionicons name="close" size={24} color={AppColors.text} />
+                <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
             <FlatList
               data={BIBLE_BOOKS}
               keyExtractor={(item) => item.abbrev}
-              ListHeaderComponent={<Text style={styles.sectionLabel}>Antigo Testamento</Text>}
+              ListHeaderComponent={<Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Antigo Testamento</Text>}
               renderItem={({ item, index }) => (
                 <>
-                  {index === 39 && <Text style={styles.sectionLabel}>Novo Testamento</Text>}
+                  {index === 39 && <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>Novo Testamento</Text>}
                   <TouchableOpacity
                     style={[styles.bookItem, index === bookIndex && styles.bookItemActive]}
                     onPress={() => selectBook(index)}
                     activeOpacity={0.7}
                   >
-                    <Text style={[styles.bookItemText, index === bookIndex && styles.bookItemTextActive]}>
+                    <Text style={[styles.bookItemText, { color: colors.text }, index === bookIndex && styles.bookItemTextActive]}>
                       {item.name}
                     </Text>
-                    <Text style={[styles.bookItemChapters, index === bookIndex && styles.bookItemTextActive]}>
+                    <Text style={[styles.bookItemChapters, { color: colors.textSecondary }, index === bookIndex && styles.bookItemTextActive]}>
                       {item.chapters} cap.
                     </Text>
                   </TouchableOpacity>
@@ -215,11 +217,11 @@ export default function BibleScreen() {
       {/* Chapter Picker Modal */}
       <Modal visible={showChapterPicker} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{currentBook.name}</Text>
+          <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>{currentBook.name}</Text>
               <TouchableOpacity onPress={() => setShowChapterPicker(false)}>
-                <Ionicons name="close" size={24} color={AppColors.text} />
+                <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
             <FlatList
@@ -229,11 +231,11 @@ export default function BibleScreen() {
               columnWrapperStyle={styles.chapterRow}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={[styles.chapterItem, item === chapter && styles.chapterItemActive]}
+                  style={[styles.chapterItem, { backgroundColor: colors.card }, item === chapter && styles.chapterItemActive]}
                   onPress={() => selectChapter(item)}
                   activeOpacity={0.7}
                 >
-                  <Text style={[styles.chapterItemText, item === chapter && styles.chapterItemTextActive]}>
+                  <Text style={[styles.chapterItemText, { color: colors.text }, item === chapter && styles.chapterItemTextActive]}>
                     {item + 1}
                   </Text>
                 </TouchableOpacity>
@@ -252,8 +254,8 @@ export default function BibleScreen() {
           activeOpacity={1}
           onPress={() => setShowVersionPicker(false)}
         >
-          <View style={styles.versionModal}>
-            <Text style={styles.versionModalTitle}>Versão da Bíblia</Text>
+          <View style={[styles.versionModal, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.versionModalTitle, { color: colors.text }]}>Versão da Bíblia</Text>
             {BIBLE_VERSIONS.map((v) => (
               <TouchableOpacity
                 key={v.key}
@@ -262,10 +264,10 @@ export default function BibleScreen() {
                 activeOpacity={0.7}
               >
                 <View>
-                  <Text style={[styles.versionItemLabel, v.key === version && styles.versionItemLabelActive]}>
+                  <Text style={[styles.versionItemLabel, { color: colors.text }, v.key === version && styles.versionItemLabelActive]}>
                     {v.label}
                   </Text>
-                  <Text style={[styles.versionItemDesc, v.key === version && styles.versionItemDescActive]}>
+                  <Text style={[styles.versionItemDesc, { color: colors.textSecondary }, v.key === version && styles.versionItemDescActive]}>
                     {v.description}
                   </Text>
                 </View>

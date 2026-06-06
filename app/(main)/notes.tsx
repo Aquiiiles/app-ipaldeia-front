@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppColors } from '@/constants/theme';
+import { useThemeColors } from '@/src/contexts/SettingsContext';
 import Toast from '@/components/Toast';
 
 const STORAGE_KEY = '@ipaldeia_notes';
@@ -26,6 +27,7 @@ type Note = {
 };
 
 export default function NotesScreen() {
+  const colors = useThemeColors();
   const [notes, setNotes] = useState<Note[]>([]);
   const [pregador, setPregador] = useState('');
   const [texto, setTexto] = useState('');
@@ -137,16 +139,16 @@ export default function NotesScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={hideToast} />
 
       {!showForm ? (
         <>
           {notes.length === 0 ? (
             <View style={styles.emptyContainer}>
-              <Ionicons name="document-text-outline" size={56} color="#c5c0b8" />
-              <Text style={styles.emptyTitle}>Nenhuma anotação</Text>
-              <Text style={styles.emptyDesc}>Suas anotações de sermões ficarão salvas aqui.</Text>
+              <Ionicons name="document-text-outline" size={56} color={colors.border} />
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>Nenhuma anotação</Text>
+              <Text style={[styles.emptyDesc, { color: colors.textSecondary }]}>Suas anotações de sermões ficarão salvas aqui.</Text>
             </View>
           ) : (
             <FlatList
@@ -155,14 +157,14 @@ export default function NotesScreen() {
               contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={false}
               renderItem={({ item }) => (
-                <TouchableOpacity style={styles.noteCard} onPress={() => openEditNote(item)} activeOpacity={0.7}>
+                <TouchableOpacity style={[styles.noteCard, { backgroundColor: colors.surface }]} onPress={() => openEditNote(item)} activeOpacity={0.7}>
                   <View style={styles.noteCardHeader}>
                     <View style={styles.noteCardInfo}>
                       {item.pregador ? (
-                        <Text style={styles.noteCardPregador} numberOfLines={1}>{item.pregador}</Text>
+                        <Text style={[styles.noteCardPregador, { color: colors.primaryDark }]} numberOfLines={1}>{item.pregador}</Text>
                       ) : null}
                       {item.texto ? (
-                        <Text style={styles.noteCardTexto} numberOfLines={1}>{item.texto}</Text>
+                        <Text style={[styles.noteCardTexto, { color: colors.textSecondary }]} numberOfLines={1}>{item.texto}</Text>
                       ) : null}
                     </View>
                     <TouchableOpacity onPress={() => setShowDeleteConfirm(item.id)} style={styles.deleteBtn}>
@@ -170,11 +172,11 @@ export default function NotesScreen() {
                     </TouchableOpacity>
                   </View>
                   {item.palavras ? (
-                    <Text style={styles.noteCardPreview} numberOfLines={2}>{item.palavras}</Text>
+                    <Text style={[styles.noteCardPreview, { color: colors.textSecondary }]} numberOfLines={2}>{item.palavras}</Text>
                   ) : item.aplicacoes ? (
-                    <Text style={styles.noteCardPreview} numberOfLines={2}>{item.aplicacoes}</Text>
+                    <Text style={[styles.noteCardPreview, { color: colors.textSecondary }]} numberOfLines={2}>{item.aplicacoes}</Text>
                   ) : null}
-                  <Text style={styles.noteCardDate}>{formatDate(item.createdAt)}</Text>
+                  <Text style={[styles.noteCardDate, { color: colors.textSecondary }]}>{formatDate(item.createdAt)}</Text>
                 </TouchableOpacity>
               )}
             />
@@ -192,54 +194,54 @@ export default function NotesScreen() {
         >
           <View style={styles.formHeader}>
             <TouchableOpacity onPress={() => { setShowForm(false); clearForm(); }} style={styles.backBtn}>
-              <Ionicons name="arrow-back" size={22} color="#4a4a40" />
+              <Ionicons name="arrow-back" size={22} color={colors.text} />
             </TouchableOpacity>
-            <Text style={styles.formTitle}>{editingId ? 'Editar Anotação' : 'Nova Anotação'}</Text>
+            <Text style={[styles.formTitle, { color: colors.primaryDark }]}>{editingId ? 'Editar Anotação' : 'Nova Anotação'}</Text>
             <View style={{ width: 22 }} />
           </View>
 
-          <Text style={styles.label}>Pregador:</Text>
+          <Text style={[styles.label, { color: colors.text }]}>Pregador:</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderBottomColor: colors.border, color: colors.text }]}
             value={pregador}
             onChangeText={setPregador}
             placeholder="Nome do pregador"
-            placeholderTextColor="#a0a090"
+            placeholderTextColor={colors.textSecondary}
           />
 
           <View style={styles.divider} />
 
-          <Text style={styles.label}>Texto:</Text>
+          <Text style={[styles.label, { color: colors.text }]}>Texto:</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderBottomColor: colors.border, color: colors.text }]}
             value={texto}
             onChangeText={setTexto}
             placeholder="Referência bíblica"
-            placeholderTextColor="#a0a090"
+            placeholderTextColor={colors.textSecondary}
           />
 
           <View style={styles.divider} />
 
-          <Text style={styles.label}>Palavras importantes:</Text>
+          <Text style={[styles.label, { color: colors.text }]}>Palavras importantes:</Text>
           <TextInput
-            style={[styles.input, styles.multilineInput]}
+            style={[styles.input, styles.multilineInput, { borderBottomColor: colors.border, color: colors.text }]}
             value={palavras}
             onChangeText={setPalavras}
             placeholder="Palavras-chave do sermão"
-            placeholderTextColor="#a0a090"
+            placeholderTextColor={colors.textSecondary}
             multiline
             textAlignVertical="top"
           />
 
           <View style={styles.divider} />
 
-          <Text style={styles.label}>Aplicações:</Text>
+          <Text style={[styles.label, { color: colors.text }]}>Aplicações:</Text>
           <TextInput
-            style={[styles.input, styles.multilineInput]}
+            style={[styles.input, styles.multilineInput, { borderBottomColor: colors.border, color: colors.text }]}
             value={aplicacoes}
             onChangeText={setAplicacoes}
             placeholder="Como aplicar na sua vida"
-            placeholderTextColor="#a0a090"
+            placeholderTextColor={colors.textSecondary}
             multiline
             textAlignVertical="top"
           />
@@ -253,12 +255,12 @@ export default function NotesScreen() {
       {/* Delete Confirm Modal */}
       <Modal visible={showDeleteConfirm !== null} animationType="fade" transparent>
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowDeleteConfirm(null)}>
-          <View style={styles.confirmModal}>
-            <Text style={styles.confirmTitle}>Excluir anotação?</Text>
-            <Text style={styles.confirmDesc}>Esta ação não pode ser desfeita.</Text>
+          <View style={[styles.confirmModal, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.confirmTitle, { color: colors.primaryDark }]}>Excluir anotação?</Text>
+            <Text style={[styles.confirmDesc, { color: colors.textSecondary }]}>Esta ação não pode ser desfeita.</Text>
             <View style={styles.confirmButtons}>
-              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowDeleteConfirm(null)} activeOpacity={0.7}>
-                <Text style={styles.cancelBtnText}>Cancelar</Text>
+              <TouchableOpacity style={[styles.cancelBtn, { borderColor: colors.border }]} onPress={() => setShowDeleteConfirm(null)} activeOpacity={0.7}>
+                <Text style={[styles.cancelBtnText, { color: colors.text }]}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.confirmDeleteBtn}
