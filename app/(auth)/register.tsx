@@ -13,14 +13,16 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 
-import { auth } from '../../src/services/firebase';
+import { auth, db } from '../../src/services/firebase';
 import logoIgreja from '../../assets/images_igreja/logo_igreja.jpg';
 import Toast from '@/components/Toast';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -37,9 +39,25 @@ export default function RegisterScreen() {
     setToast(prev => ({ ...prev, visible: false }));
   }
 
+  function formatPhone(value: string) {
+    const digits = value.replace(/\D/g, '').slice(0, 11);
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+    return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
+  }
+
+  function handlePhoneChange(value: string) {
+    setPhone(formatPhone(value));
+  }
+
   async function handleRegister() {
-    if (!name.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
+    if (!name.trim() || !phone.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
       showToast('Preencha todos os campos.', 'warning');
+      return;
+    }
+    const phoneDigits = phone.replace(/\D/g, '');
+    if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+      showToast('Digite um número de celular válido com DDD.', 'warning');
       return;
     }
     if (password !== confirmPassword) {
@@ -55,6 +73,12 @@ export default function RegisterScreen() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email.trim(), password);
       await updateProfile(userCredential.user, { displayName: name.trim() });
+      await setDoc(doc(db, 'usuarios', userCredential.user.uid), {
+        nome: name.trim(),
+        email: email.trim(),
+        telefone: phoneDigits,
+        criadoEm: new Date().toISOString(),
+      });
       router.replace('/(main)');
     } catch (error: any) {
       console.log('Register error:', error.code);
@@ -103,6 +127,18 @@ export default function RegisterScreen() {
                 autoCapitalize="words"
                 value={name}
                 onChangeText={setName}
+              />
+            </View>
+
+            <View style={styles.inputWrapper}>
+              <Ionicons name="logo-whatsapp" size={18} color="#8a8a7a" style={styles.inputIcon} />
+              <TextInput
+                style={styles.input}
+                placeholder="WhatsApp (com DDD)"
+                placeholderTextColor="#a0a090"
+                keyboardType="phone-pad"
+                value={phone}
+                onChangeText={handlePhoneChange}
               />
             </View>
 

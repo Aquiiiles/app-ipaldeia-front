@@ -116,9 +116,6 @@ export default function LoginScreen() {
     }
   }
 
-  function handleFacebookLogin() {
-    showToast('Login com Facebook estará disponível em breve.', 'warning');
-  }
 
   return (
     <KeyboardAvoidingView
@@ -214,14 +211,6 @@ export default function LoginScreen() {
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.facebookButton}
-              onPress={handleFacebookLogin}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.facebookButtonText}>ENTRAR COM FACEBOOK</Text>
-            </TouchableOpacity>
-
             <View style={styles.registerLinkContainer}>
               <Text style={styles.registerLinkText}>Não tem uma conta? </Text>
               <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
@@ -310,25 +299,11 @@ const styles = StyleSheet.create({
     height: 44,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: 16,
     backgroundColor: 'transparent',
   },
   gmailButtonText: {
     color: '#4a4a40',
-    fontSize: 13,
-    fontWeight: '600',
-    letterSpacing: 1,
-  },
-  facebookButton: {
-    backgroundColor: '#3C4A3E',
-    borderRadius: 25,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  facebookButtonText: {
-    color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '600',
     letterSpacing: 1,
