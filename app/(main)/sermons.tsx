@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
+import { useThemeColors } from '@/src/contexts/SettingsContext';
 import {
   fetchChannelVideos,
   formatPublishedDate,
@@ -22,6 +23,7 @@ import {
 const CHANNEL_URL = 'https://www.youtube.com/@ipaldeia';
 
 export default function SermonsScreen() {
+  const colors = useThemeColors();
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -58,16 +60,16 @@ export default function SermonsScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.liveBanner} activeOpacity={0.8} onPress={openChannel}>
+    <View style={[styles.container, { backgroundColor: colors.headerBg }]}>
+      <TouchableOpacity style={[styles.liveBanner, { backgroundColor: colors.card }]} activeOpacity={0.8} onPress={openChannel}>
         <View style={styles.liveDot} />
         <Text style={styles.liveText}>AO VIVO</Text>
       </TouchableOpacity>
 
       <View style={styles.channelRow}>
-        <Text style={styles.channelLabel}>Últimos vídeos do canal</Text>
+        <Text style={[styles.channelLabel, { color: colors.textSecondary }]}>Últimos vídeos do canal</Text>
         <TouchableOpacity onPress={openChannel} activeOpacity={0.7}>
-          <Text style={styles.channelLink}>Ver canal</Text>
+          <Text style={[styles.channelLink, { color: colors.textSecondary }]}>Ver canal</Text>
         </TouchableOpacity>
       </View>
 
@@ -96,7 +98,7 @@ export default function SermonsScreen() {
           {videos.map((video) => (
             <TouchableOpacity
               key={video.id}
-              style={styles.card}
+              style={[styles.card, { backgroundColor: colors.card }]}
               activeOpacity={0.7}
               onPress={() => openVideo(video.url)}
             >
@@ -111,8 +113,8 @@ export default function SermonsScreen() {
                 </View>
               </View>
               <View style={styles.cardInfo}>
-                <Text style={styles.cardTitle} numberOfLines={2}>{video.title}</Text>
-                <Text style={styles.cardMeta}>
+                <Text style={[styles.cardTitle, { color: colors.text }]} numberOfLines={2}>{video.title}</Text>
+                <Text style={[styles.cardMeta, { color: colors.textSecondary }]}>
                   {formatPublishedDate(video.published)} • {getRelativeTime(video.published)}
                 </Text>
               </View>

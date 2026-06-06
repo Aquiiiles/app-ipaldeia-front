@@ -8,11 +8,13 @@ import {
 } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
 import { AppColors } from '@/constants/theme';
+import { useThemeColors } from '@/src/contexts/SettingsContext';
 import { useState } from 'react';
 
 const PIX_KEY = '12.345.678/0001-90';
 
 export default function DonationsScreen() {
+  const colors = useThemeColors();
   const [copied, setCopied] = useState(false);
 
   const handleCopyPix = async () => {
@@ -23,7 +25,7 @@ export default function DonationsScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.headerBg }]}
       contentContainerStyle={styles.content}
     >
       <TouchableOpacity
@@ -36,24 +38,24 @@ export default function DonationsScreen() {
         </Text>
       </TouchableOpacity>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Dados bancários:</Text>
+      <View style={[styles.card, { backgroundColor: colors.card }]}>
+        <Text style={[styles.cardTitle, { color: colors.text }]}>Dados bancários:</Text>
 
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>Banco:</Text>
-          <Text style={styles.rowValue}>Banco do Brasil</Text>
+          <Text style={[styles.rowLabel, { color: colors.text }]}>Banco:</Text>
+          <Text style={[styles.rowValue, { color: colors.textSecondary }]}>Banco do Brasil</Text>
         </View>
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>Agência:</Text>
-          <Text style={styles.rowValue}>1234-5</Text>
+          <Text style={[styles.rowLabel, { color: colors.text }]}>Agência:</Text>
+          <Text style={[styles.rowValue, { color: colors.textSecondary }]}>1234-5</Text>
         </View>
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>Conta:</Text>
-          <Text style={styles.rowValue}>12345-6</Text>
+          <Text style={[styles.rowLabel, { color: colors.text }]}>Conta:</Text>
+          <Text style={[styles.rowValue, { color: colors.textSecondary }]}>12345-6</Text>
         </View>
         <View style={styles.row}>
-          <Text style={styles.rowLabel}>CNPJ:</Text>
-          <Text style={styles.rowValue}>12.345.678/0001-90</Text>
+          <Text style={[styles.rowLabel, { color: colors.text }]}>CNPJ:</Text>
+          <Text style={[styles.rowValue, { color: colors.textSecondary }]}>12.345.678/0001-90</Text>
         </View>
       </View>
 

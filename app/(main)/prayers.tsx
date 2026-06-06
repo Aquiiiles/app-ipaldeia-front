@@ -11,8 +11,10 @@ import {
   ScrollView,
 } from 'react-native';
 import { AppColors } from '@/constants/theme';
+import { useThemeColors } from '@/src/contexts/SettingsContext';
 
 export default function PrayersScreen() {
+  const colors = useThemeColors();
   const [motivo, setMotivo] = useState('');
 
   const handleSubmit = () => {
@@ -26,21 +28,21 @@ export default function PrayersScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.label}>Motivo:</Text>
+        <Text style={[styles.label, { color: colors.text }]}>Motivo:</Text>
 
         <TextInput
-          style={styles.textInput}
+          style={[styles.textInput, { borderBottomColor: colors.border, color: colors.text }]}
           multiline
           numberOfLines={8}
           placeholder="Escreva seu pedido de oração aqui..."
-          placeholderTextColor="#a0a090"
+          placeholderTextColor={colors.textSecondary}
           value={motivo}
           onChangeText={setMotivo}
           textAlignVertical="top"

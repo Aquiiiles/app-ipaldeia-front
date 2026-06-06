@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { signOut, updateProfile } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { AppColors } from '@/constants/theme';
+import { useThemeColors } from '@/src/contexts/SettingsContext';
 import { auth, db } from '../../src/services/firebase';
 import { isAdmin } from '@/src/services/admin';
 import Toast from '@/components/Toast';
@@ -39,6 +40,7 @@ const MENU_ITEMS: MenuItem[] = [
 ];
 
 export default function ProfileScreen() {
+  const colors = useThemeColors();
   const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
@@ -194,11 +196,11 @@ export default function ProfileScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={hideToast} />
 
       <View style={styles.header}>
-        <TouchableOpacity style={styles.avatarCircle} onPress={handlePickPhoto} disabled={uploadingPhoto} activeOpacity={0.7}>
+        <TouchableOpacity style={[styles.avatarCircle, { backgroundColor: colors.border }]} onPress={handlePickPhoto} disabled={uploadingPhoto} activeOpacity={0.7}>
           {uploadingPhoto ? (
             <ActivityIndicator color="#999" size="large" />
           ) : userPhoto ? (
@@ -206,12 +208,12 @@ export default function ProfileScreen() {
           ) : (
             <Ionicons name="camera-outline" size={24} color="#999" />
           )}
-          <View style={styles.avatarEditBadge}>
+          <View style={[styles.avatarEditBadge, { borderColor: colors.background }]}>
             <Ionicons name="pencil" size={12} color="#FFFFFF" />
           </View>
         </TouchableOpacity>
-        <Text style={styles.userName}>{userName || 'Seu nome'}</Text>
-        <Text style={styles.userEmail}>{userEmail}</Text>
+        <Text style={[styles.userName, { color: colors.primaryDark }]}>{userName || 'Seu nome'}</Text>
+        <Text style={[styles.userEmail, { color: colors.textSecondary }]}>{userEmail}</Text>
         <View style={styles.badge}>
           <Text style={styles.badgeText}>{admin ? 'Admin' : 'Membro'}</Text>
         </View>
@@ -221,15 +223,15 @@ export default function ProfileScreen() {
         {MENU_ITEMS.map((item) => (
           <TouchableOpacity
             key={item.label}
-            style={styles.menuItem}
+            style={[styles.menuItem, { borderBottomColor: colors.border }]}
             onPress={() => handlePress(item.action)}
             activeOpacity={0.6}
           >
-            <Ionicons name={item.icon} size={20} color={item.color || '#4a4a40'} style={styles.menuIcon} />
-            <Text style={[styles.menuLabel, item.color ? { color: item.color } : undefined]}>
+            <Ionicons name={item.icon} size={20} color={item.color || colors.text} style={styles.menuIcon} />
+            <Text style={[styles.menuLabel, { color: colors.text }, item.color ? { color: item.color } : undefined]}>
               {item.label}
             </Text>
-            <Ionicons name="chevron-forward" size={16} color={item.color || '#b0b0a0'} />
+            <Ionicons name="chevron-forward" size={16} color={item.color || colors.textSecondary} />
           </TouchableOpacity>
         ))}
       </View>
@@ -237,17 +239,17 @@ export default function ProfileScreen() {
       {/* Minha Conta Modal */}
       <Modal visible={showAccount} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Minha Conta</Text>
+          <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Minha Conta</Text>
               <TouchableOpacity onPress={() => setShowAccount(false)}>
-                <Ionicons name="close" size={24} color={AppColors.text} />
+                <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
 
             <ScrollView contentContainerStyle={styles.modalContent}>
               <View style={styles.editAvatarContainer}>
-                <TouchableOpacity style={styles.editAvatar} onPress={handlePickPhoto} disabled={uploadingPhoto} activeOpacity={0.7}>
+                <TouchableOpacity style={[styles.editAvatar, { backgroundColor: colors.border }]} onPress={handlePickPhoto} disabled={uploadingPhoto} activeOpacity={0.7}>
                   {uploadingPhoto ? (
                     <ActivityIndicator color="#999" size="large" />
                   ) : userPhoto ? (
@@ -255,31 +257,31 @@ export default function ProfileScreen() {
                   ) : (
                     <Ionicons name="person" size={40} color="#999" />
                   )}
-                  <View style={styles.editAvatarBadge}>
+                  <View style={[styles.editAvatarBadge, { borderColor: colors.surface }]}>
                     <Ionicons name="camera" size={16} color="#FFFFFF" />
                   </View>
                 </TouchableOpacity>
-                <Text style={styles.editAvatarHint}>Toque para alterar a foto</Text>
+                <Text style={[styles.editAvatarHint, { color: colors.textSecondary }]}>Toque para alterar a foto</Text>
               </View>
 
-              <Text style={styles.fieldLabel}>Nome</Text>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Nome</Text>
               <TextInput
-                style={styles.fieldInput}
+                style={[styles.fieldInput, { borderBottomColor: colors.border, color: colors.text }]}
                 value={editName}
                 onChangeText={setEditName}
                 placeholder="Seu nome"
-                placeholderTextColor="#a0a090"
+                placeholderTextColor={colors.textSecondary}
                 autoCapitalize="words"
               />
 
-              <Text style={styles.fieldLabel}>E-mail</Text>
-              <View style={styles.fieldReadonly}>
-                <Text style={styles.fieldReadonlyText}>{userEmail}</Text>
-                <Ionicons name="lock-closed-outline" size={14} color="#b0b0a0" />
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>E-mail</Text>
+              <View style={[styles.fieldReadonly, { borderBottomColor: colors.border }]}>
+                <Text style={[styles.fieldReadonlyText, { color: colors.textSecondary }]}>{userEmail}</Text>
+                <Ionicons name="lock-closed-outline" size={14} color={colors.textSecondary} />
               </View>
 
               <TouchableOpacity
-                style={styles.saveButton}
+                style={[styles.saveButton, { backgroundColor: colors.primaryDark }]}
                 onPress={handleSaveProfile}
                 disabled={saving}
                 activeOpacity={0.8}
@@ -298,40 +300,40 @@ export default function ProfileScreen() {
       {/* Quem Somos Modal */}
       <Modal visible={showAbout} animationType="slide" transparent>
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Quem Somos</Text>
+          <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Quem Somos</Text>
               <TouchableOpacity onPress={() => setShowAbout(false)}>
-                <Ionicons name="close" size={24} color={AppColors.text} />
+                <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
             </View>
 
             <ScrollView contentContainerStyle={styles.aboutContent}>
-              <Text style={styles.aboutTitle}>Igreja Presbiteriana de Aldeia</Text>
-              <Text style={styles.aboutText}>
+              <Text style={[styles.aboutTitle, { color: colors.primaryDark }]}>Igreja Presbiteriana de Aldeia</Text>
+              <Text style={[styles.aboutText, { color: colors.text }]}>
                 Presbiteriana e reformada. Pregando a Palavra de forma integral, buscando exaltar o nome de Cristo e viver o evangelho.
               </Text>
 
               <View style={styles.aboutInfo}>
                 <View style={styles.aboutRow}>
-                  <Ionicons name="location-outline" size={18} color={AppColors.primaryDark} />
-                  <Text style={styles.aboutInfoText}>Estrada de Aldeia, Km 9,5 - Camaragibe, PE</Text>
+                  <Ionicons name="location-outline" size={18} color={colors.primaryDark} />
+                  <Text style={[styles.aboutInfoText, { color: colors.text }]}>Estrada de Aldeia, Km 9,5 - Camaragibe, PE</Text>
                 </View>
                 <TouchableOpacity
                   style={styles.aboutRow}
                   onPress={() => Linking.openURL('https://www.instagram.com/ip_aldeia/')}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="logo-instagram" size={18} color={AppColors.primaryDark} />
-                  <Text style={[styles.aboutInfoText, styles.aboutLink]}>@ip_aldeia</Text>
+                  <Ionicons name="logo-instagram" size={18} color={colors.primaryDark} />
+                  <Text style={[styles.aboutInfoText, styles.aboutLink, { color: colors.text }]}>@ip_aldeia</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.aboutRow}
                   onPress={() => Linking.openURL('https://www.youtube.com/@ipaldeia')}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="logo-youtube" size={18} color={AppColors.primaryDark} />
-                  <Text style={[styles.aboutInfoText, styles.aboutLink]}>@ipaldeia</Text>
+                  <Ionicons name="logo-youtube" size={18} color={colors.primaryDark} />
+                  <Text style={[styles.aboutInfoText, styles.aboutLink, { color: colors.text }]}>@ipaldeia</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>
@@ -342,16 +344,16 @@ export default function ProfileScreen() {
       {/* Logout Confirm Modal */}
       <Modal visible={showLogoutConfirm} animationType="fade" transparent>
         <TouchableOpacity style={styles.logoutOverlay} activeOpacity={1} onPress={() => setShowLogoutConfirm(false)}>
-          <View style={styles.logoutModal}>
-            <Text style={styles.logoutTitle}>Deseja sair?</Text>
-            <Text style={styles.logoutDesc}>Você precisará fazer login novamente para acessar o app.</Text>
+          <View style={[styles.logoutModal, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.logoutTitle, { color: colors.primaryDark }]}>Deseja sair?</Text>
+            <Text style={[styles.logoutDesc, { color: colors.textSecondary }]}>Você precisará fazer login novamente para acessar o app.</Text>
             <View style={styles.logoutButtons}>
               <TouchableOpacity
-                style={styles.logoutCancelBtn}
+                style={[styles.logoutCancelBtn, { borderColor: colors.border }]}
                 onPress={() => setShowLogoutConfirm(false)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.logoutCancelText}>Cancelar</Text>
+                <Text style={[styles.logoutCancelText, { color: colors.text }]}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.logoutConfirmBtn}
