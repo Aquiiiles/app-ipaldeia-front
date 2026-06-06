@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
-import { useThemeColors } from '@/src/contexts/SettingsContext';
+import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
 import {
   fetchChannelVideos,
   formatPublishedDate,
@@ -24,6 +24,7 @@ const CHANNEL_URL = 'https://www.youtube.com/@ipaldeia';
 
 export default function SermonsScreen() {
   const colors = useThemeColors();
+  const { fontSize } = useSettings();
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -113,7 +114,7 @@ export default function SermonsScreen() {
                 </View>
               </View>
               <View style={styles.cardInfo}>
-                <Text style={[styles.cardTitle, { color: colors.text }]} numberOfLines={2}>{video.title}</Text>
+                <Text style={[styles.cardTitle, { color: colors.text, fontSize }]} numberOfLines={2}>{video.title}</Text>
                 <Text style={[styles.cardMeta, { color: colors.textSecondary }]}>
                   {formatPublishedDate(video.published)} • {getRelativeTime(video.published)}
                 </Text>

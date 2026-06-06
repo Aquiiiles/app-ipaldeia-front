@@ -16,7 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
-import { useThemeColors } from '@/src/contexts/SettingsContext';
+import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
 import { isAdmin } from '@/src/services/admin';
 import { fetchNews, addNews, updateNews, deleteNews, NewsItem } from '@/src/services/firestore';
 import Toast from '@/components/Toast';
@@ -58,6 +58,7 @@ export default function HomeScreen() {
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' | 'warning' });
 
   const colors = useThemeColors();
+  const { fontSize } = useSettings();
 
   function showToast(message: string, type: 'success' | 'error' | 'warning' = 'success') {
     setToast({ visible: true, message, type });
@@ -218,8 +219,8 @@ export default function HomeScreen() {
                   <Ionicons name="megaphone-outline" size={24} color="#FFFFFF" />
                 </View>
                 <View style={styles.newsContent}>
-                  <Text style={styles.newsTitle} numberOfLines={2}>{item.title}</Text>
-                  {item.body ? <Text style={styles.newsBody} numberOfLines={2}>{item.body}</Text> : null}
+                  <Text style={[styles.newsTitle, { fontSize }]} numberOfLines={2}>{item.title}</Text>
+                  {item.body ? <Text style={[styles.newsBody, { fontSize: fontSize - 2 }]} numberOfLines={2}>{item.body}</Text> : null}
                   <Text style={styles.newsDate}>{item.date}</Text>
                 </View>
                 {admin && (
