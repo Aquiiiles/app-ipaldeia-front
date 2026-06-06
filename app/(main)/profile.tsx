@@ -17,7 +17,6 @@ import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { signOut, updateProfile } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import * as ImagePicker from 'expo-image-picker';
 import { AppColors } from '@/constants/theme';
 import { auth, storage } from '../../src/services/firebase';
 import { isAdmin } from '@/src/services/admin';
@@ -126,38 +125,49 @@ export default function ProfileScreen() {
     }
   }
 
+  function pickPhotoWeb(): Promise<Blob | null> {
+    return new Promise((resolve) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = () => {
+        const file = input.files?.[0] ?? null;
+        resolve(file);
+      };
+      input.click();
+    });
+  }
+
   async function handlePickPhoto() {
     const user = auth.currentUser;
     if (!user) return;
 
     try {
-      const permResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!permResult.granted) {
-        showToast('Permissão para acessar fotos negada.', 'warning');
-        return;
+      let blob: Blob | null = null;
+
+      if (Platform.OS === 'web') {
+        blob = await pickPhotoWeb();
+      } else {
+        const ImagePicker = require('expo-image-picker');
+        const permResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permResult.granted) {
+          showToast('Permissão para acessar fotos negada.', 'warning');
+          return;
+        }
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ['images'],
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.7,
+        });
+        if (result.canceled || !result.assets?.[0]?.uri) return;
+        const response = await fetch(result.assets[0].uri);
+        blob = await response.blob();
       }
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.7,
-      });
-
-      if (result.canceled || !result.assets?.[0]?.uri) return;
+      if (!blob) return;
 
       setUploadingPhoto(true);
-      const uri = result.assets[0].uri;
-
-      let blob: Blob;
-      if (Platform.OS === 'web') {
-        const response = await fetch(uri);
-        blob = await response.blob();
-      } else {
-        const response = await fetch(uri);
-        blob = await response.blob();
-      }
-
       const storageRef = ref(storage, `profile_photos/${user.uid}.jpg`);
       await uploadBytes(storageRef, blob);
       const downloadURL = await getDownloadURL(storageRef);
@@ -166,9 +176,7 @@ export default function ProfileScreen() {
       showToast('Foto atualizada!', 'success');
     } catch (error: any) {
       console.log('Photo upload error:', error?.code || error?.message || error);
-      if (error?.code === 'storage/unauthorized' || error?.code === 'storage/unauthenticated') {
-        showToast('Ative o Firebase Storage no console.', 'warning');
-      } else if (error?.code === 'storage/unknown') {
+      if (error?.code?.startsWith?.('storage/')) {
         showToast('Ative o Firebase Storage no console.', 'warning');
       } else {
         showToast('Erro ao enviar foto. Tente novamente.', 'error');
