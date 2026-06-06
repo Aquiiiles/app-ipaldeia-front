@@ -3,6 +3,7 @@ import { initializeAuth, getAuth, browserLocalPersistence, GoogleAuthProvider } 
 // @ts-ignore
 import { getReactNativePersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -29,5 +30,6 @@ if (Platform.OS === 'web') {
 }
 
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 export const googleProvider = new GoogleAuthProvider();
 export { auth };

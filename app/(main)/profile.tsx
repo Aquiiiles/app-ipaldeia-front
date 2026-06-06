@@ -16,8 +16,10 @@ import {
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { signOut, updateProfile } from 'firebase/auth';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import * as ImagePicker from 'expo-image-picker';
 import { AppColors } from '@/constants/theme';
-import { auth } from '../../src/services/firebase';
+import { auth, storage } from '../../src/services/firebase';
 import { isAdmin } from '@/src/services/admin';
 import Toast from '@/components/Toast';
 
@@ -46,6 +48,7 @@ export default function ProfileScreen() {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [editName, setEditName] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [admin, setAdmin] = useState(false);
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' | 'warning' });
 
@@ -123,6 +126,37 @@ export default function ProfileScreen() {
     }
   }
 
+  async function handlePickPhoto() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+
+    if (result.canceled) return;
+
+    setUploadingPhoto(true);
+    try {
+      const uri = result.assets[0].uri;
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      const storageRef = ref(storage, `profile_photos/${user.uid}.jpg`);
+      await uploadBytes(storageRef, blob);
+      const downloadURL = await getDownloadURL(storageRef);
+      await updateProfile(user, { photoURL: downloadURL });
+      setUserPhoto(downloadURL);
+      showToast('Foto atualizada!', 'success');
+    } catch {
+      showToast('Erro ao enviar foto. Tente novamente.', 'error');
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
+
   async function handleLogout() {
     try {
       await signOut(auth);
@@ -137,12 +171,17 @@ export default function ProfileScreen() {
       <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={hideToast} />
 
       <View style={styles.header}>
-        <TouchableOpacity style={styles.avatarCircle} onPress={() => { setEditName(userName); setShowAccount(true); }} activeOpacity={0.7}>
-          {userPhoto ? (
+        <TouchableOpacity style={styles.avatarCircle} onPress={handlePickPhoto} disabled={uploadingPhoto} activeOpacity={0.7}>
+          {uploadingPhoto ? (
+            <ActivityIndicator color="#999" size="large" />
+          ) : userPhoto ? (
             <Image source={{ uri: userPhoto }} style={styles.avatarImage} />
           ) : (
             <Ionicons name="camera-outline" size={24} color="#999" />
           )}
+          <View style={styles.avatarEditBadge}>
+            <Ionicons name="pencil" size={12} color="#FFFFFF" />
+          </View>
         </TouchableOpacity>
         <Text style={styles.userName}>{userName || 'Seu nome'}</Text>
         <Text style={styles.userEmail}>{userEmail}</Text>
@@ -181,14 +220,19 @@ export default function ProfileScreen() {
 
             <ScrollView contentContainerStyle={styles.modalContent}>
               <View style={styles.editAvatarContainer}>
-                <View style={styles.editAvatar}>
-                  {userPhoto ? (
+                <TouchableOpacity style={styles.editAvatar} onPress={handlePickPhoto} disabled={uploadingPhoto} activeOpacity={0.7}>
+                  {uploadingPhoto ? (
+                    <ActivityIndicator color="#999" size="large" />
+                  ) : userPhoto ? (
                     <Image source={{ uri: userPhoto }} style={styles.editAvatarImage} />
                   ) : (
                     <Ionicons name="person" size={40} color="#999" />
                   )}
-                </View>
-                <Text style={styles.editAvatarHint}>Foto vinculada à sua conta Google</Text>
+                  <View style={styles.editAvatarBadge}>
+                    <Ionicons name="camera" size={16} color="#FFFFFF" />
+                  </View>
+                </TouchableOpacity>
+                <Text style={styles.editAvatarHint}>Toque para alterar a foto</Text>
               </View>
 
               <Text style={styles.fieldLabel}>Nome</Text>
@@ -325,6 +369,19 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 45,
   },
+  avatarEditBadge: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: AppColors.primaryDark,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#E8E4DD',
+  },
   userName: {
     fontSize: 18,
     fontWeight: '700',
@@ -414,6 +471,19 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
+  },
+  editAvatarBadge: {
+    position: 'absolute',
+    bottom: 4,
+    right: 4,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: AppColors.primaryDark,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#F5F0EB',
   },
   editAvatarHint: {
     fontSize: 12,
