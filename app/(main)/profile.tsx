@@ -130,28 +130,49 @@ export default function ProfileScreen() {
     const user = auth.currentUser;
     if (!user) return;
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.7,
-    });
-
-    if (result.canceled) return;
-
-    setUploadingPhoto(true);
     try {
+      const permResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permResult.granted) {
+        showToast('Permissão para acessar fotos negada.', 'warning');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+
+      if (result.canceled || !result.assets?.[0]?.uri) return;
+
+      setUploadingPhoto(true);
       const uri = result.assets[0].uri;
-      const response = await fetch(uri);
-      const blob = await response.blob();
+
+      let blob: Blob;
+      if (Platform.OS === 'web') {
+        const response = await fetch(uri);
+        blob = await response.blob();
+      } else {
+        const response = await fetch(uri);
+        blob = await response.blob();
+      }
+
       const storageRef = ref(storage, `profile_photos/${user.uid}.jpg`);
       await uploadBytes(storageRef, blob);
       const downloadURL = await getDownloadURL(storageRef);
       await updateProfile(user, { photoURL: downloadURL });
       setUserPhoto(downloadURL);
       showToast('Foto atualizada!', 'success');
-    } catch {
-      showToast('Erro ao enviar foto. Tente novamente.', 'error');
+    } catch (error: any) {
+      console.log('Photo upload error:', error?.code || error?.message || error);
+      if (error?.code === 'storage/unauthorized' || error?.code === 'storage/unauthenticated') {
+        showToast('Ative o Firebase Storage no console.', 'warning');
+      } else if (error?.code === 'storage/unknown') {
+        showToast('Ative o Firebase Storage no console.', 'warning');
+      } else {
+        showToast('Erro ao enviar foto. Tente novamente.', 'error');
+      }
     } finally {
       setUploadingPhoto(false);
     }
