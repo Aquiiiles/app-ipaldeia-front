@@ -132,7 +132,7 @@ export default function ProfileScreen() {
     }
   }
 
-  function pickPhoto(): Promise<File | null> {
+  function pickPhotoWeb(): Promise<File | null> {
     return new Promise((resolve) => {
       const input = document.createElement('input');
       input.type = 'file';
@@ -145,7 +145,7 @@ export default function ProfileScreen() {
     });
   }
 
-  function fileToBase64(file: File): Promise<string> {
+  function fileToBase64Web(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const canvas = document.createElement('canvas');
       const img = new window.Image();
@@ -169,12 +169,17 @@ export default function ProfileScreen() {
     const user = auth.currentUser;
     if (!user) return;
 
+    if (Platform.OS !== 'web') {
+      showToast('Disponível apenas na versão web por enquanto.', 'warning');
+      return;
+    }
+
     try {
-      const file = await pickPhoto();
+      const file = await pickPhotoWeb();
       if (!file) return;
 
       setUploadingPhoto(true);
-      const base64 = await fileToBase64(file);
+      const base64 = await fileToBase64Web(file);
       await setDoc(doc(db, 'usuarios', user.uid), { fotoBase64: base64 }, { merge: true });
       await updateProfile(user, { photoURL: base64 });
       setUserPhoto(base64);
