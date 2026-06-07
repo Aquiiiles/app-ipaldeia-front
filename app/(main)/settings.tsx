@@ -3,12 +3,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSettings, useThemeColors } from '@/src/contexts/SettingsContext';
 import { AppColors } from '@/constants/theme';
 
-const FONT_SIZES = [
-  { label: 'P', value: 14 },
-  { label: 'M', value: 16 },
-  { label: 'G', value: 18 },
-  { label: 'GG', value: 20 },
-];
+const MIN_FONT = 12;
+const MAX_FONT = 32;
 
 export default function SettingsScreen() {
   const { darkMode, setDarkMode, fontSize, setFontSize } = useSettings();
@@ -38,29 +34,24 @@ export default function SettingsScreen() {
             <Text style={[styles.rowLabel, { color: colors.text }]}>Tamanho da fonte</Text>
           </View>
         </View>
-        <View style={styles.fontSizeRow}>
-          {FONT_SIZES.map((size) => (
-            <TouchableOpacity
-              key={size.value}
-              style={[
-                styles.fontSizeBtn,
-                { borderColor: colors.border },
-                fontSize === size.value && styles.fontSizeBtnActive,
-              ]}
-              onPress={() => setFontSize(size.value)}
-              activeOpacity={0.7}
-            >
-              <Text
-                style={[
-                  styles.fontSizeBtnText,
-                  { color: colors.textSecondary, fontSize: size.value - 2 },
-                  fontSize === size.value && styles.fontSizeBtnTextActive,
-                ]}
-              >
-                {size.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+        <View style={styles.fontSizeControls}>
+          <TouchableOpacity
+            style={[styles.fontSizeCircle, { borderColor: colors.border, opacity: fontSize <= MIN_FONT ? 0.3 : 1 }]}
+            onPress={() => fontSize > MIN_FONT && setFontSize(fontSize - 1)}
+            disabled={fontSize <= MIN_FONT}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="remove" size={22} color={colors.text} />
+          </TouchableOpacity>
+          <Text style={[styles.fontSizeValue, { color: colors.text }]}>{fontSize}</Text>
+          <TouchableOpacity
+            style={[styles.fontSizeCircle, { borderColor: colors.border, opacity: fontSize >= MAX_FONT ? 0.3 : 1 }]}
+            onPress={() => fontSize < MAX_FONT && setFontSize(fontSize + 1)}
+            disabled={fontSize >= MAX_FONT}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="add" size={22} color={colors.text} />
+          </TouchableOpacity>
         </View>
         <Text style={[styles.fontPreview, { color: colors.textSecondary, fontSize }]}>
           Exemplo de texto com esta fonte
@@ -151,13 +142,14 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
   },
-  fontSizeRow: {
+  fontSizeControls: {
     flexDirection: 'row',
-    gap: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 20,
     marginBottom: 12,
-    paddingLeft: 32,
   },
-  fontSizeBtn: {
+  fontSizeCircle: {
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -165,15 +157,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  fontSizeBtnActive: {
-    backgroundColor: '#3C4A3E',
-    borderColor: '#3C4A3E',
-  },
-  fontSizeBtnText: {
-    fontWeight: '600',
-  },
-  fontSizeBtnTextActive: {
-    color: '#FFFFFF',
+  fontSizeValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    minWidth: 36,
+    textAlign: 'center',
   },
   fontPreview: {
     textAlign: 'center',
