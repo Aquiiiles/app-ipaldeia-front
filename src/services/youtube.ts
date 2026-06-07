@@ -86,6 +86,7 @@ async function fetchWithTimeout(url: string, timeoutMs = 8000): Promise<Response
 
 export async function fetchChannelVideos(): Promise<YouTubeVideo[]> {
   if (Platform.OS !== 'web') {
+    // Native platforms can fetch directly without CORS proxies
     try {
       const response = await fetchWithTimeout(RSS_URL);
       if (response.ok) {
@@ -94,8 +95,11 @@ export async function fetchChannelVideos(): Promise<YouTubeVideo[]> {
         if (videos.length > 0) return videos;
       }
     } catch {}
+    // On native, skip CORS proxies (they are web-only) and fall back directly
+    return FALLBACK_VIDEOS;
   }
 
+  // Web: needs CORS proxies since direct fetch is blocked by browser CORS policy
   for (const makeProxy of CORS_PROXIES) {
     try {
       const proxyUrl = makeProxy(RSS_URL);
