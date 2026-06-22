@@ -1,8 +1,8 @@
 import { Stack } from 'expo-router';
 import { AppColors } from '@/constants/theme';
-import { SettingsProvider, useThemeColors } from '@/src/contexts/SettingsContext';
+import { useThemeColors } from '@/src/contexts/SettingsContext';
 
-function MainStack() {
+export default function MainLayout() {
   const colors = useThemeColors();
 
   return (
@@ -28,13 +28,5 @@ function MainStack() {
       <Stack.Screen name="profile" options={{ title: 'Perfil' }} />
       <Stack.Screen name="settings" options={{ title: 'Configurações' }} />
     </Stack>
-  );
-}
-
-export default function MainLayout() {
-  return (
-    <SettingsProvider>
-      <MainStack />
-    </SettingsProvider>
   );
 }

@@ -39,6 +39,13 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Notes — private per-user (only owner can read/write their own)
+    match /anotacoes/{docId} {
+      allow read: if isSignedIn() && resource.data.authorId == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.authorId == request.auth.uid;
+    }
+
     // Prayers — anyone reads/creates, author deletes, anyone updates prayedBy
     match /oracoes/{docId} {
       allow read: if isSignedIn();

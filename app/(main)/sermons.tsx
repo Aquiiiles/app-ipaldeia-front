@@ -62,9 +62,10 @@ export default function SermonsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.headerBg }]}>
-      <TouchableOpacity style={[styles.liveBanner, { backgroundColor: colors.card }]} activeOpacity={0.8} onPress={openChannel}>
-        <View style={styles.liveDot} />
-        <Text style={styles.liveText}>AO VIVO</Text>
+      <TouchableOpacity style={styles.channelBanner} activeOpacity={0.85} onPress={openChannel}>
+        <Ionicons name="logo-youtube" size={22} color="#FFFFFF" />
+        <Text style={styles.channelBannerText}>Acompanhe nosso canal no YouTube</Text>
+        <Ionicons name="open-outline" size={16} color="rgba(255,255,255,0.8)" />
       </TouchableOpacity>
 
       <View style={styles.channelRow}>
@@ -137,28 +138,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: AppColors.headerBg,
   },
-  liveBanner: {
+  channelBanner: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: '#CC0000',
     marginHorizontal: 20,
     marginTop: 14,
     paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: 10,
     gap: 8,
   },
-  liveDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#E53935',
-  },
-  liveText: {
+  channelBannerText: {
     color: '#FFFFFF',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
-    letterSpacing: 1,
   },
   channelRow: {
     flexDirection: 'row',

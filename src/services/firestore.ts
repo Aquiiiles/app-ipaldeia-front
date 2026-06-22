@@ -192,3 +192,39 @@ export async function addHymn(data: Omit<HymnItem, 'id' | 'createdAt'>): Promise
 export async function deleteHymn(id: string): Promise<void> {
   await deleteDoc(doc(db, 'hinos', id));
 }
+
+// --- Notes (per-user) ---
+
+export type NoteItem = {
+  id: string;
+  authorId: string;
+  pregador: string;
+  texto: string;
+  palavras: string;
+  aplicacoes: string;
+  createdAt: number;
+};
+
+export function subscribeNotes(userId: string, callback: (items: NoteItem[]) => void): Unsubscribe {
+  const q = query(collection(db, 'anotacoes'), orderBy('createdAt', 'desc'));
+  return onSnapshot(q, (snapshot) => {
+    const all = snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as NoteItem[];
+    callback(all.filter(n => n.authorId === userId));
+  });
+}
+
+export async function addNote(data: Omit<NoteItem, 'id' | 'createdAt'>): Promise<string> {
+  const ref = await addDoc(collection(db, 'anotacoes'), {
+    ...data,
+    createdAt: Date.now(),
+  });
+  return ref.id;
+}
+
+export async function updateNote(id: string, data: Partial<Omit<NoteItem, 'id' | 'authorId' | 'createdAt'>>): Promise<void> {
+  await updateDoc(doc(db, 'anotacoes', id), data);
+}
+
+export async function deleteNote(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'anotacoes', id));
+}

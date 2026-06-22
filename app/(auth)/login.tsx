@@ -16,10 +16,12 @@ import { signInWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup } f
 import { Ionicons } from '@expo/vector-icons';
 
 import { auth, googleProvider } from '../../src/services/firebase';
+import { useThemeColors } from '@/src/contexts/SettingsContext';
 import logoIgreja from '../../assets/images_igreja/logo_igreja.jpg';
 import Toast from '@/components/Toast';
 
 export default function LoginScreen() {
+  const colors = useThemeColors();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -121,7 +123,7 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.flex}
+      style={[styles.flex, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <Toast
@@ -143,12 +145,12 @@ export default function LoginScreen() {
           />
 
           <View style={styles.form}>
-            <View style={styles.inputWrapper}>
-              <Ionicons name="mail-outline" size={18} color="#8a8a7a" style={styles.inputIcon} />
+            <View style={[styles.inputWrapper, { borderBottomColor: colors.border }]}>
+              <Ionicons name="mail-outline" size={18} color={colors.textSecondary} style={styles.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: colors.text }]}
                 placeholder="Seu e-mail"
-                placeholderTextColor="#a0a090"
+                placeholderTextColor={colors.textSecondary}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -157,12 +159,12 @@ export default function LoginScreen() {
               />
             </View>
 
-            <View style={styles.inputWrapper}>
-              <Ionicons name="lock-closed-outline" size={18} color="#8a8a7a" style={styles.inputIcon} />
+            <View style={[styles.inputWrapper, { borderBottomColor: colors.border }]}>
+              <Ionicons name="lock-closed-outline" size={18} color={colors.textSecondary} style={styles.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: colors.text }]}
                 placeholder="Sua senha"
-                placeholderTextColor="#a0a090"
+                placeholderTextColor={colors.textSecondary}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 value={password}
@@ -175,7 +177,7 @@ export default function LoginScreen() {
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={18}
-                  color="#8a8a7a"
+                  color={colors.textSecondary}
                 />
               </TouchableOpacity>
             </View>
@@ -197,26 +199,26 @@ export default function LoginScreen() {
               style={styles.forgotPassword}
               onPress={handleForgotPassword}
             >
-              <Text style={styles.forgotPasswordText}>Esqueci a senha</Text>
+              <Text style={[styles.forgotPasswordText, { color: colors.textSecondary }]}>Esqueci a senha</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.gmailButton}
+              style={[styles.gmailButton, { borderColor: colors.border }]}
               onPress={handleGoogleLogin}
               disabled={googleLoading}
               activeOpacity={0.8}
             >
               {googleLoading ? (
-                <ActivityIndicator color="#4a4a40" />
+                <ActivityIndicator color={colors.text} />
               ) : (
-                <Text style={styles.gmailButtonText}>ENTRAR COM GMAIL</Text>
+                <Text style={[styles.gmailButtonText, { color: colors.text }]}>ENTRAR COM GMAIL</Text>
               )}
             </TouchableOpacity>
 
             <View style={styles.registerLinkContainer}>
-              <Text style={styles.registerLinkText}>Não tem uma conta? </Text>
+              <Text style={[styles.registerLinkText, { color: colors.textSecondary }]}>Não tem uma conta? </Text>
               <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
-                <Text style={styles.registerLinkAction}>Cadastre-se</Text>
+                <Text style={[styles.registerLinkAction, { color: colors.primaryDark }]}>Cadastre-se</Text>
               </TouchableOpacity>
             </View>
           </View>
