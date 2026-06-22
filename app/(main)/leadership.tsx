@@ -19,9 +19,9 @@ const TABS: { key: TabKey; label: string }[] = [
 ];
 
 const LEADERS: Record<TabKey, string[]> = {
-  pastores: ['Rev. João Silva', 'Rev. Pedro Santos'],
-  presbiteros: ['Altimar Duarte', 'André Figueiredo'],
-  diaconos: ['Carlos Mendes', 'Lucas Oliveira'],
+  pastores: ['Rev. Relrison Silva', 'Rev. Doug Leaman'],
+  presbiteros: ['Presb. Altimar Duarte', 'Presb. André Figueiredo'],
+  diaconos: ['Diác. Rafael Amorim', 'Diác. Gonçalo Barbosa', 'Diác. Adauto Telino'],
 };
 
 export default function LeadershipScreen() {
@@ -32,8 +32,8 @@ export default function LeadershipScreen() {
   const leaders = LEADERS[activeTab];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.headerBg }]}>
-      <View style={styles.tabRow}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.tabRow, { backgroundColor: colors.headerBg }]}>
         {TABS.map((tab) => {
           const isActive = tab.key === activeTab;
           return (
@@ -54,8 +54,8 @@ export default function LeadershipScreen() {
       <ScrollView contentContainerStyle={styles.listContent}>
         {leaders.map((name) => (
           <View key={name} style={[styles.card, { backgroundColor: colors.card }]}>
-            <View style={styles.avatar}>
-              <Ionicons name="camera-outline" size={22} color={colors.textSecondary} />
+            <View style={[styles.avatar, { backgroundColor: colors.border }]}>
+              <Ionicons name="person" size={22} color={colors.textSecondary} />
             </View>
             <Text style={[styles.leaderName, { color: colors.text, fontSize }]}>{name}</Text>
           </View>
