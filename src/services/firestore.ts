@@ -80,3 +80,51 @@ export async function updateEvent(id: string, data: Partial<Omit<EventItem, 'id'
 export async function deleteEvent(id: string): Promise<void> {
   await deleteDoc(doc(db, 'eventos', id));
 }
+
+// --- Prayers ---
+
+export type PrayerItem = {
+  id: string;
+  text: string;
+  authorName: string;
+  authorId: string;
+  prayedBy: string[];
+  createdAt: number;
+};
+
+export async function fetchPrayers(): Promise<PrayerItem[]> {
+  const q = query(collection(db, 'oracoes'), orderBy('createdAt', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(d => {
+    const data = d.data();
+    return {
+      id: d.id,
+      text: data.text ?? '',
+      authorName: data.authorName ?? '',
+      authorId: data.authorId ?? '',
+      prayedBy: data.prayedBy ?? [],
+      createdAt: data.createdAt ?? 0,
+    } as PrayerItem;
+  });
+}
+
+export async function addPrayer(data: Omit<PrayerItem, 'id' | 'createdAt' | 'prayedBy'>): Promise<string> {
+  const ref = await addDoc(collection(db, 'oracoes'), {
+    ...data,
+    prayedBy: [],
+    createdAt: Date.now(),
+  });
+  return ref.id;
+}
+
+export async function togglePrayed(prayerId: string, userId: string, currentList: string[]): Promise<string[]> {
+  const newList = currentList.includes(userId)
+    ? currentList.filter(id => id !== userId)
+    : [...currentList, userId];
+  await updateDoc(doc(db, 'oracoes', prayerId), { prayedBy: newList });
+  return newList;
+}
+
+export async function deletePrayer(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'oracoes', id));
+}
