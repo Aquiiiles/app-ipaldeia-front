@@ -7,7 +7,9 @@ import {
   getDocs,
   query,
   orderBy,
+  onSnapshot,
   Timestamp,
+  type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from './firebase';
 
@@ -28,6 +30,13 @@ export async function fetchNews(): Promise<NewsItem[]> {
     id: d.id,
     ...d.data(),
   })) as NewsItem[];
+}
+
+export function subscribeNews(callback: (items: NewsItem[]) => void): Unsubscribe {
+  const q = query(collection(db, 'noticias'), orderBy('createdAt', 'desc'));
+  return onSnapshot(q, (snapshot) => {
+    callback(snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as NewsItem[]);
+  });
 }
 
 export async function addNews(data: Omit<NewsItem, 'id' | 'createdAt'>): Promise<string> {
@@ -63,6 +72,13 @@ export async function fetchEvents(): Promise<EventItem[]> {
     id: d.id,
     ...d.data(),
   })) as EventItem[];
+}
+
+export function subscribeEvents(callback: (items: EventItem[]) => void): Unsubscribe {
+  const q = query(collection(db, 'eventos'), orderBy('date', 'asc'));
+  return onSnapshot(q, (snapshot) => {
+    callback(snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as EventItem[]);
+  });
 }
 
 export async function addEvent(data: Omit<EventItem, 'id' | 'createdAt'>): Promise<string> {
@@ -105,6 +121,23 @@ export async function fetchPrayers(): Promise<PrayerItem[]> {
       prayedBy: data.prayedBy ?? [],
       createdAt: data.createdAt ?? 0,
     } as PrayerItem;
+  });
+}
+
+export function subscribePrayers(callback: (items: PrayerItem[]) => void): Unsubscribe {
+  const q = query(collection(db, 'oracoes'), orderBy('createdAt', 'desc'));
+  return onSnapshot(q, (snapshot) => {
+    callback(snapshot.docs.map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        text: data.text ?? '',
+        authorName: data.authorName ?? '',
+        authorId: data.authorId ?? '',
+        prayedBy: data.prayedBy ?? [],
+        createdAt: data.createdAt ?? 0,
+      } as PrayerItem;
+    }));
   });
 }
 

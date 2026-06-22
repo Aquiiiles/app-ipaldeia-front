@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
 import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
 import { auth } from '@/src/services/firebase';
-import { fetchPrayers, addPrayer, togglePrayed, deletePrayer, PrayerItem } from '@/src/services/firestore';
+import { subscribePrayers, addPrayer, togglePrayed, deletePrayer, PrayerItem } from '@/src/services/firestore';
 import Toast from '@/components/Toast';
 
 export default function PrayersScreen() {
@@ -36,19 +36,14 @@ export default function PrayersScreen() {
     setToast({ visible: true, message, type });
   }
 
-  const loadPrayers = useCallback(async () => {
-    try {
-      const data = await fetchPrayers();
+  useEffect(() => {
+    const unsubscribe = subscribePrayers((data) => {
       setPrayers(data);
-    } catch {
-      showToast('Erro ao carregar pedidos.', 'error');
-    } finally {
       setLoading(false);
       setRefreshing(false);
-    }
+    });
+    return unsubscribe;
   }, []);
-
-  useEffect(() => { loadPrayers(); }, [loadPrayers]);
 
   async function handleSubmit() {
     if (!text.trim()) {
@@ -61,7 +56,6 @@ export default function PrayersScreen() {
       setText('');
       setShowForm(false);
       showToast('Pedido publicado!');
-      loadPrayers();
     } catch {
       showToast('Erro ao publicar. Tente novamente.', 'error');
     } finally {
@@ -83,7 +77,6 @@ export default function PrayersScreen() {
       await deletePrayer(id);
       setShowDeleteConfirm(null);
       showToast('Pedido removido.');
-      loadPrayers();
     } catch {
       showToast('Erro ao excluir.', 'error');
     }
@@ -163,7 +156,7 @@ export default function PrayersScreen() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadPrayers(); }} />
+            <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); setTimeout(() => setRefreshing(false), 1000); }} />
           }
           ListEmptyComponent={
             <View style={styles.empty}>

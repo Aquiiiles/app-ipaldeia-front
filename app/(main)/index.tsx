@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -18,7 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
 import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
 import { isAdmin } from '@/src/services/admin';
-import { fetchNews, addNews, updateNews, deleteNews, NewsItem } from '@/src/services/firestore';
+import { subscribeNews, addNews, updateNews, deleteNews, NewsItem } from '@/src/services/firestore';
 import Toast from '@/components/Toast';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -64,22 +64,15 @@ export default function HomeScreen() {
     setToast({ visible: true, message, type });
   }
 
-  const loadNews = useCallback(async () => {
-    try {
-      const data = await fetchNews();
-      setNews(data);
-    } catch {
-      // silently fail, show empty
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
   useEffect(() => {
     setAdmin(isAdmin());
-    loadNews();
-  }, [loadNews]);
+    const unsubscribe = subscribeNews((data) => {
+      setNews(data);
+      setLoading(false);
+      setRefreshing(false);
+    });
+    return unsubscribe;
+  }, []);
 
   function openNewNews() {
     setEditingNews(null);
@@ -114,7 +107,6 @@ export default function HomeScreen() {
         showToast('Notícia publicada!');
       }
       setShowForm(false);
-      loadNews();
     } catch {
       showToast('Erro ao salvar.', 'error');
     } finally {
@@ -127,7 +119,6 @@ export default function HomeScreen() {
       await deleteNews(id);
       setShowDeleteConfirm(null);
       showToast('Notícia excluída.');
-      loadNews();
     } catch {
       showToast('Erro ao excluir.', 'error');
     }
@@ -162,7 +153,7 @@ export default function HomeScreen() {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadNews(); }} />
+          <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); setTimeout(() => setRefreshing(false), 1000); }} />
         }
       >
         <View style={styles.logoSection}>
