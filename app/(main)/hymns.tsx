@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -7,104 +7,38 @@ import {
   StyleSheet,
   FlatList,
   Modal,
-  ActivityIndicator,
   ScrollView,
+  Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
 import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
-import { isAdmin } from '@/src/services/admin';
-import { subscribeHymns, addHymn, deleteHymn, HymnItem } from '@/src/services/firestore';
-import Toast from '@/components/Toast';
+import { HINARIO_PRESBITERIANO, Hymn } from '@/constants/hymns';
 
 type HymnBook = 'hinario' | 'salterio';
+
+const SALTERIO_URL = 'https://appsalterioreformado.com.br/';
 
 export default function HymnsScreen() {
   const colors = useThemeColors();
   const { fontSize } = useSettings();
   const [activeBook, setActiveBook] = useState<HymnBook>('hinario');
-  const [hymns, setHymns] = useState<HymnItem[]>([]);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [admin, setAdmin] = useState(false);
-  const [selectedHymn, setSelectedHymn] = useState<HymnItem | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [formNumber, setFormNumber] = useState('');
-  const [formTitle, setFormTitle] = useState('');
-  const [formLyrics, setFormLyrics] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
-  const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' | 'warning' });
+  const [selectedHymn, setSelectedHymn] = useState<Hymn | null>(null);
 
-  function showToast(message: string, type: 'success' | 'error' | 'warning' = 'success') {
-    setToast({ visible: true, message, type });
-  }
-
-  useEffect(() => {
-    setAdmin(isAdmin());
-  }, []);
-
-  useEffect(() => {
-    setLoading(true);
-    const unsubscribe = subscribeHymns(activeBook, (data) => {
-      setHymns(data);
-      setLoading(false);
-    });
-    return unsubscribe;
-  }, [activeBook]);
-
-  const filtered = hymns.filter(h => {
+  const filtered = HINARIO_PRESBITERIANO.filter(h => {
     if (!search.trim()) return true;
     const q = search.toLowerCase();
-    return (
-      h.title.toLowerCase().includes(q) ||
-      h.number.toString().includes(q)
-    );
+    return h.title.toLowerCase().includes(q) || h.number.toString().includes(q);
   });
 
-  async function handleSave() {
-    if (!formNumber.trim() || !formTitle.trim()) {
-      showToast('Preencha número e título.', 'warning');
-      return;
-    }
-    setSaving(true);
-    try {
-      await addHymn({
-        number: parseInt(formNumber, 10) || 0,
-        title: formTitle.trim(),
-        lyrics: formLyrics.trim(),
-        book: activeBook,
-      });
-      setShowForm(false);
-      setFormNumber('');
-      setFormTitle('');
-      setFormLyrics('');
-      showToast('Hino adicionado!');
-    } catch {
-      showToast('Erro ao salvar.', 'error');
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleDelete(id: string) {
-    try {
-      await deleteHymn(id);
-      setShowDeleteConfirm(null);
-      setSelectedHymn(null);
-      showToast('Hino removido.');
-    } catch {
-      showToast('Erro ao excluir.', 'error');
-    }
-  }
-
-  const renderItem = ({ item }: { item: HymnItem }) => (
+  const renderItem = ({ item }: { item: Hymn }) => (
     <TouchableOpacity
       style={[styles.hymnRow, { backgroundColor: colors.card }]}
       onPress={() => setSelectedHymn(item)}
       activeOpacity={0.7}
     >
-      <View style={[styles.numberBadge, { backgroundColor: activeBook === 'hinario' ? '#5B7F5E' : '#6B8E9B' }]}>
+      <View style={[styles.numberBadge, { backgroundColor: '#5B7F5E' }]}>
         <Text style={styles.numberText}>{item.number}</Text>
       </View>
       <Text style={[styles.hymnTitle, { color: colors.text, fontSize: fontSize - 1 }]} numberOfLines={2}>
@@ -116,12 +50,10 @@ export default function HymnsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={() => setToast(p => ({ ...p, visible: false }))} />
-
       <View style={[styles.bookTabs, { backgroundColor: colors.headerBg }]}>
         <TouchableOpacity
           style={[styles.bookTab, activeBook === 'hinario' && styles.bookTabActive]}
-          onPress={() => { setActiveBook('hinario'); setSearch(''); }}
+          onPress={() => setActiveBook('hinario')}
           activeOpacity={0.7}
         >
           <Ionicons name="musical-notes" size={16} color={activeBook === 'hinario' ? '#FFFFFF' : 'rgba(255,255,255,0.5)'} />
@@ -131,7 +63,7 @@ export default function HymnsScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.bookTab, activeBook === 'salterio' && styles.bookTabActive]}
-          onPress={() => { setActiveBook('salterio'); setSearch(''); }}
+          onPress={() => setActiveBook('salterio')}
           activeOpacity={0.7}
         >
           <Ionicons name="book" size={16} color={activeBook === 'salterio' ? '#FFFFFF' : 'rgba(255,255,255,0.5)'} />
@@ -141,54 +73,69 @@ export default function HymnsScreen() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.searchRow}>
-        <View style={[styles.searchBox, { backgroundColor: colors.card }]}>
-          <Ionicons name="search" size={18} color={colors.textSecondary} />
-          <TextInput
-            style={[styles.searchInput, { color: colors.text }]}
-            placeholder="Buscar por número ou título..."
-            placeholderTextColor={colors.textSecondary}
-            value={search}
-            onChangeText={setSearch}
-          />
-          {search.length > 0 && (
-            <TouchableOpacity onPress={() => setSearch('')}>
-              <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
-            </TouchableOpacity>
-          )}
-        </View>
-        {admin && (
-          <TouchableOpacity
-            style={[styles.addBtn, { backgroundColor: activeBook === 'hinario' ? '#5B7F5E' : '#6B8E9B' }]}
-            onPress={() => setShowForm(true)}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="add" size={22} color="#FFFFFF" />
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {loading ? (
-        <ActivityIndicator color={AppColors.primaryDark} style={{ marginTop: 40 }} />
-      ) : (
-        <FlatList
-          data={filtered}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={styles.empty}>
-              <Ionicons name="musical-notes-outline" size={48} color="#c5c0b8" />
-              <Text style={[styles.emptyTitle, { color: colors.text }]}>
-                {search ? 'Nenhum hino encontrado' : 'Nenhum hino cadastrado'}
-              </Text>
-              <Text style={[styles.emptyDesc, { color: colors.textSecondary }]}>
-                {search ? 'Tente buscar por outro número ou título' : admin ? 'Toque no + para adicionar hinos' : 'Os hinos serão adicionados em breve'}
-              </Text>
+      {activeBook === 'hinario' ? (
+        <>
+          <View style={styles.searchRow}>
+            <View style={[styles.searchBox, { backgroundColor: colors.card }]}>
+              <Ionicons name="search" size={18} color={colors.textSecondary} />
+              <TextInput
+                style={[styles.searchInput, { color: colors.text }]}
+                placeholder="Buscar por número ou título..."
+                placeholderTextColor={colors.textSecondary}
+                value={search}
+                onChangeText={setSearch}
+              />
+              {search.length > 0 && (
+                <TouchableOpacity onPress={() => setSearch('')}>
+                  <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
+                </TouchableOpacity>
+              )}
             </View>
-          }
-        />
+          </View>
+
+          <FlatList
+            data={filtered}
+            keyExtractor={(item) => item.number.toString()}
+            renderItem={renderItem}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={styles.empty}>
+                <Ionicons name="musical-notes-outline" size={48} color="#c5c0b8" />
+                <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                  {search ? 'Nenhum hino encontrado' : 'Hinos em breve'}
+                </Text>
+                <Text style={[styles.emptyDesc, { color: colors.textSecondary }]}>
+                  {search
+                    ? 'Tente buscar por outro número ou título'
+                    : 'Os hinos do Hinário Presbiteriano serão disponibilizados aqui.'}
+                </Text>
+              </View>
+            }
+          />
+        </>
+      ) : (
+        <View style={styles.salterioContainer}>
+          <View style={[styles.salterioCard, { backgroundColor: colors.card }]}>
+            <View style={[styles.salterioIcon, { backgroundColor: '#6B8E9B' }]}>
+              <Ionicons name="book" size={32} color="#FFFFFF" />
+            </View>
+            <Text style={[styles.salterioTitle, { color: colors.text }]}>Saltério Reformado</Text>
+            <Text style={[styles.salterioDesc, { color: colors.textSecondary, fontSize }]}>
+              O Saltério Reformado tem um aplicativo próprio, feito com muito carinho por nossos
+              irmãos. Acesse lá o conteúdo completo dos salmos cantados.
+            </Text>
+            <TouchableOpacity
+              style={styles.salterioButton}
+              onPress={() => Linking.openURL(SALTERIO_URL)}
+              activeOpacity={0.85}
+            >
+              <Ionicons name="open-outline" size={18} color="#FFFFFF" />
+              <Text style={styles.salterioButtonText}>Abrir o app do Saltério</Text>
+            </TouchableOpacity>
+            <Text style={[styles.salterioUrl, { color: colors.textSecondary }]}>appsalterioreformado.com.br</Text>
+          </View>
+        </View>
       )}
 
       {/* Hymn Detail Modal */}
@@ -199,116 +146,26 @@ export default function HymnsScreen() {
               <>
                 <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
                   <View style={styles.modalHeaderLeft}>
-                    <View style={[styles.numberBadgeLg, { backgroundColor: activeBook === 'hinario' ? '#5B7F5E' : '#6B8E9B' }]}>
+                    <View style={[styles.numberBadgeLg, { backgroundColor: '#5B7F5E' }]}>
                       <Text style={styles.numberTextLg}>{selectedHymn.number}</Text>
                     </View>
                     <Text style={[styles.modalTitle, { color: colors.text }]} numberOfLines={2}>
                       {selectedHymn.title}
                     </Text>
                   </View>
-                  <View style={styles.modalHeaderRight}>
-                    {admin && (
-                      <TouchableOpacity onPress={() => setShowDeleteConfirm(selectedHymn.id)} style={styles.deleteIcon}>
-                        <Ionicons name="trash-outline" size={20} color="#c0392b" />
-                      </TouchableOpacity>
-                    )}
-                    <TouchableOpacity onPress={() => setSelectedHymn(null)}>
-                      <Ionicons name="close" size={24} color={colors.text} />
-                    </TouchableOpacity>
-                  </View>
+                  <TouchableOpacity onPress={() => setSelectedHymn(null)}>
+                    <Ionicons name="close" size={24} color={colors.text} />
+                  </TouchableOpacity>
                 </View>
                 <ScrollView contentContainerStyle={styles.lyricsContent} showsVerticalScrollIndicator={false}>
-                  {selectedHymn.lyrics ? (
-                    <Text style={[styles.lyricsText, { color: colors.text, fontSize }]}>
-                      {selectedHymn.lyrics}
-                    </Text>
-                  ) : (
-                    <View style={styles.noLyrics}>
-                      <Ionicons name="document-text-outline" size={36} color={colors.textSecondary} />
-                      <Text style={[styles.noLyricsText, { color: colors.textSecondary }]}>
-                        Letra ainda não disponível
-                      </Text>
-                    </View>
-                  )}
+                  <Text style={[styles.lyricsText, { color: colors.text, fontSize }]}>
+                    {selectedHymn.lyrics}
+                  </Text>
                 </ScrollView>
               </>
             )}
           </View>
         </View>
-      </Modal>
-
-      {/* Add Hymn Modal */}
-      <Modal visible={showForm} animationType="slide" transparent>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>
-                Adicionar {activeBook === 'hinario' ? 'Hino' : 'Salmo'}
-              </Text>
-              <TouchableOpacity onPress={() => setShowForm(false)}>
-                <Ionicons name="close" size={24} color={colors.text} />
-              </TouchableOpacity>
-            </View>
-            <ScrollView contentContainerStyle={styles.formContent} keyboardShouldPersistTaps="handled">
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>NÚMERO</Text>
-              <TextInput
-                style={[styles.fieldInput, { borderBottomColor: colors.border, color: colors.text }]}
-                value={formNumber}
-                onChangeText={setFormNumber}
-                placeholder="Ex: 1"
-                placeholderTextColor={colors.textSecondary}
-                keyboardType="numeric"
-              />
-
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>TÍTULO</Text>
-              <TextInput
-                style={[styles.fieldInput, { borderBottomColor: colors.border, color: colors.text }]}
-                value={formTitle}
-                onChangeText={setFormTitle}
-                placeholder="Nome do hino"
-                placeholderTextColor={colors.textSecondary}
-              />
-
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>LETRA (OPCIONAL)</Text>
-              <TextInput
-                style={[styles.fieldInput, styles.fieldMultiline, { borderBottomColor: colors.border, color: colors.text }]}
-                value={formLyrics}
-                onChangeText={setFormLyrics}
-                placeholder="Cole a letra do hino aqui..."
-                placeholderTextColor={colors.textSecondary}
-                multiline
-                textAlignVertical="top"
-              />
-
-              <TouchableOpacity
-                style={[styles.saveButton, { backgroundColor: activeBook === 'hinario' ? '#5B7F5E' : '#6B8E9B' }]}
-                onPress={handleSave}
-                disabled={saving}
-                activeOpacity={0.8}
-              >
-                {saving ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.saveButtonText}>SALVAR</Text>}
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Delete Confirm */}
-      <Modal visible={showDeleteConfirm !== null} animationType="fade" transparent>
-        <TouchableOpacity style={styles.confirmOverlay} activeOpacity={1} onPress={() => setShowDeleteConfirm(null)}>
-          <View style={[styles.confirmModal, { backgroundColor: colors.surface }]}>
-            <Text style={[styles.confirmTitle, { color: colors.text }]}>Excluir hino?</Text>
-            <Text style={[styles.confirmDesc, { color: colors.textSecondary }]}>Esta ação não pode ser desfeita.</Text>
-            <View style={styles.confirmButtons}>
-              <TouchableOpacity style={[styles.cancelBtn, { borderColor: colors.border }]} onPress={() => setShowDeleteConfirm(null)} activeOpacity={0.7}>
-                <Text style={[styles.cancelBtnText, { color: colors.text }]}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.deleteBtn} onPress={() => showDeleteConfirm && handleDelete(showDeleteConfirm)} activeOpacity={0.7}>
-                <Text style={styles.deleteBtnText}>Excluir</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </TouchableOpacity>
       </Modal>
     </View>
   );
@@ -349,7 +206,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    gap: 10,
     alignItems: 'center',
   },
   searchBox: {
@@ -365,13 +221,6 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     height: 44,
-  },
-  addBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   listContent: {
     padding: 16,
@@ -415,6 +264,53 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 40,
   },
+  salterioContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    padding: 24,
+  },
+  salterioCard: {
+    borderRadius: 18,
+    padding: 28,
+    alignItems: 'center',
+  },
+  salterioIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  salterioTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 10,
+  },
+  salterioDesc: {
+    fontSize: 14,
+    lineHeight: 22,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  salterioButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#6B8E9B',
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 25,
+  },
+  salterioButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  salterioUrl: {
+    fontSize: 12,
+    marginTop: 14,
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -440,11 +336,6 @@ const styles = StyleSheet.create({
     gap: 12,
     flex: 1,
   },
-  modalHeaderRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
   modalTitle: {
     fontSize: 17,
     fontWeight: '700',
@@ -462,104 +353,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
-  deleteIcon: {
-    padding: 4,
-  },
   lyricsContent: {
     padding: 24,
     paddingBottom: 40,
   },
   lyricsText: {
     lineHeight: 28,
-  },
-  noLyrics: {
-    alignItems: 'center',
-    paddingTop: 40,
-    gap: 12,
-  },
-  noLyricsText: {
-    fontSize: 14,
-  },
-  formContent: {
-    padding: 24,
-  },
-  fieldLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 6,
-  },
-  fieldInput: {
-    borderBottomWidth: 1,
-    paddingVertical: 10,
-    fontSize: 15,
-    marginBottom: 20,
-  },
-  fieldMultiline: {
-    minHeight: 120,
-  },
-  saveButton: {
-    borderRadius: 25,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 8,
-  },
-  saveButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 1.5,
-  },
-  confirmOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  confirmModal: {
-    borderRadius: 16,
-    padding: 24,
-    width: '80%',
-    maxWidth: 320,
-  },
-  confirmTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  confirmDesc: {
-    fontSize: 14,
-    marginBottom: 24,
-  },
-  confirmButtons: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  cancelBtn: {
-    flex: 1,
-    borderWidth: 1,
-    borderRadius: 25,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cancelBtnText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  deleteBtn: {
-    flex: 1,
-    backgroundColor: '#c0392b',
-    borderRadius: 25,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  deleteBtnText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
   },
 });
