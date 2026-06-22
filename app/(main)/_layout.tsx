@@ -15,7 +15,6 @@ export default function MainLayout() {
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="groups" options={{ title: 'Grupos' }} />
       <Stack.Screen name="hymns" options={{ title: 'Hinos' }} />
       <Stack.Screen name="agenda" options={{ title: 'Agenda' }} />
       <Stack.Screen name="bible" options={{ title: 'Bíblia ARA' }} />
