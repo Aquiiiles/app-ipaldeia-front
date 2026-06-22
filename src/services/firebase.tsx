@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { initializeAuth, getAuth, browserLocalPersistence, GoogleAuthProvider } from 'firebase/auth';
 // @ts-ignore
 import { getReactNativePersistence } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, persistentSingleTabManager } from 'firebase/firestore';
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -26,6 +26,12 @@ if (Platform.OS === 'web') {
   });
 }
 
-export const db = getFirestore(app);
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: Platform.OS === 'web'
+      ? persistentMultipleTabManager()
+      : persistentSingleTabManager({ forceOwnership: true }),
+  }),
+});
 export const googleProvider = new GoogleAuthProvider();
 export { auth };
