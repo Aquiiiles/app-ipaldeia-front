@@ -40,7 +40,7 @@ const features: FeatureItem[] = [
   { label: 'Doações', icon: 'gift-outline', route: '/(main)/donations' },
   { label: 'Documentos', icon: 'folder-open-outline', route: '/(main)/documents' },
   { label: 'Agenda', icon: 'calendar-outline', route: '/(main)/agenda' },
-  { label: 'Grupos', icon: 'people-outline', route: '/(main)/groups' },
+  { label: 'Hinos', icon: 'musical-notes-outline', route: '/(main)/hymns' },
   { label: 'Liderança', icon: 'shield-outline', route: '/(main)/leadership' },
 ];
 
