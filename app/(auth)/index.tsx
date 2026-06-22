@@ -3,10 +3,12 @@ import { View, Image, StyleSheet, Animated, Text } from 'react-native';
 import { router } from 'expo-router';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../src/services/firebase';
+import { useSettings } from '@/src/contexts/SettingsContext';
 
 import logoIgreja from '../../assets/images_igreja/logo_igreja.jpg';
 
 export default function SplashScreen() {
+  const { darkMode } = useSettings();
   const logoScale = useRef(new Animated.Value(0.6)).current;
   const logoOpacity = useRef(new Animated.Value(0)).current;
   const textOpacity = useRef(new Animated.Value(0)).current;
@@ -45,7 +47,7 @@ export default function SplashScreen() {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, darkMode && { backgroundColor: '#1e2a1f' }]}>
       <Animated.View style={[styles.logoContainer, { opacity: logoOpacity, transform: [{ scale: logoScale }] }]}>
         <Image source={logoIgreja} style={styles.logo} resizeMode="contain" />
       </Animated.View>

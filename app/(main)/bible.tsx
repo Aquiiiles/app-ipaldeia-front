@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  TextInput,
   TouchableOpacity,
   Modal,
   FlatList,
@@ -18,6 +19,14 @@ type BibleBookData = {
   abbrev: string;
   name: string;
   chapters: string[][];
+};
+
+type SearchResult = {
+  bookIndex: number;
+  bookName: string;
+  chapter: number;
+  verse: number;
+  text: string;
 };
 
 const bibleCache: Record<string, BibleBookData[]> = {};
@@ -50,8 +59,52 @@ export default function BibleScreen() {
   const [showBookPicker, setShowBookPicker] = useState(false);
   const [showChapterPicker, setShowChapterPicker] = useState(false);
   const [showVersionPicker, setShowVersionPicker] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
 
   const currentBook = BIBLE_BOOKS[bookIndex];
+
+  function runSearch() {
+    const q = searchQuery.trim().toLowerCase();
+    if (q.length < 3) {
+      setSearchResults([]);
+      return;
+    }
+    setSearching(true);
+    setTimeout(() => {
+      const data = loadBibleData(version);
+      const results: SearchResult[] = [];
+      for (let b = 0; b < data.length && results.length < 60; b++) {
+        const book = data[b];
+        for (let c = 0; c < book.chapters.length && results.length < 60; c++) {
+          const chapterVerses = book.chapters[c];
+          for (let v = 0; v < chapterVerses.length && results.length < 60; v++) {
+            if (chapterVerses[v].toLowerCase().includes(q)) {
+              results.push({
+                bookIndex: b,
+                bookName: BIBLE_BOOKS[b]?.name ?? book.name,
+                chapter: c,
+                verse: v,
+                text: chapterVerses[v],
+              });
+            }
+          }
+        }
+      }
+      setSearchResults(results);
+      setSearching(false);
+    }, 30);
+  }
+
+  function goToResult(result: SearchResult) {
+    setBookIndex(result.bookIndex);
+    setChapter(result.chapter);
+    setShowSearch(false);
+    setSearchQuery('');
+    setSearchResults([]);
+  }
 
   const loadChapter = useCallback((ver: BibleVersion, bIdx: number, ch: number) => {
     setLoading(true);
@@ -128,6 +181,13 @@ export default function BibleScreen() {
         </TouchableOpacity>
         <View style={{ flex: 1 }} />
         <TouchableOpacity
+          style={[styles.iconButton, { backgroundColor: colors.card, borderColor: colors.border }]}
+          onPress={() => setShowSearch(true)}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="search" size={16} color={colors.primaryDark} />
+        </TouchableOpacity>
+        <TouchableOpacity
           style={[styles.versionButton, { backgroundColor: colors.card, borderColor: colors.border }]}
           onPress={() => setShowVersionPicker(true)}
           activeOpacity={0.7}
@@ -177,6 +237,80 @@ export default function BibleScreen() {
           <Ionicons name="chevron-forward" size={20} color={hasNext ? colors.primaryDark : colors.border} />
         </TouchableOpacity>
       </View>
+
+      {/* Search Modal */}
+      <Modal visible={showSearch} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContainer, { backgroundColor: colors.surface, maxHeight: '85%' }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Buscar na {version}</Text>
+              <TouchableOpacity onPress={() => { setShowSearch(false); setSearchQuery(''); setSearchResults([]); }}>
+                <Ionicons name="close" size={24} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.searchInputRow}>
+              <View style={[styles.searchBox, { backgroundColor: colors.card, borderColor: colors.border }]}>
+                <Ionicons name="search" size={18} color={colors.textSecondary} />
+                <TextInput
+                  style={[styles.searchInput, { color: colors.text }]}
+                  placeholder="Digite uma palavra ou frase..."
+                  placeholderTextColor={colors.textSecondary}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  onSubmitEditing={runSearch}
+                  returnKeyType="search"
+                  autoFocus
+                />
+                {searchQuery.length > 0 && (
+                  <TouchableOpacity onPress={() => { setSearchQuery(''); setSearchResults([]); }}>
+                    <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
+                  </TouchableOpacity>
+                )}
+              </View>
+              <TouchableOpacity
+                style={[styles.searchButton, { backgroundColor: colors.primaryDark }]}
+                onPress={runSearch}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.searchButtonText}>Buscar</Text>
+              </TouchableOpacity>
+            </View>
+
+            {searching ? (
+              <ActivityIndicator color={colors.primaryDark} style={{ marginTop: 30 }} />
+            ) : (
+              <FlatList
+                data={searchResults}
+                keyExtractor={(item, i) => `${item.bookIndex}-${item.chapter}-${item.verse}-${i}`}
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ padding: 16 }}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={[styles.searchResult, { backgroundColor: colors.card }]}
+                    onPress={() => goToResult(item)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[styles.searchResultRef, { color: colors.primaryDark }]}>
+                      {item.bookName} {item.chapter + 1}:{item.verse + 1}
+                    </Text>
+                    <Text style={[styles.searchResultText, { color: colors.text }]} numberOfLines={2}>
+                      {item.text}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+                ListEmptyComponent={
+                  <Text style={[styles.searchHint, { color: colors.textSecondary }]}>
+                    {searchQuery.trim().length >= 3
+                      ? 'Nenhum resultado encontrado.'
+                      : 'Digite ao menos 3 letras e toque em Buscar.'}
+                  </Text>
+                }
+              />
+            )}
+          </View>
+        </View>
+      </Modal>
 
       {/* Book Picker Modal */}
       <Modal visible={showBookPicker} animationType="slide" transparent>
@@ -310,6 +444,15 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
+  iconButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
   versionButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -319,6 +462,60 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: AppColors.border,
+  },
+  searchInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+  },
+  searchBox: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    height: 44,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    height: 44,
+  },
+  searchButton: {
+    height: 44,
+    paddingHorizontal: 18,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  searchButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  searchResult: {
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 8,
+  },
+  searchResultRef: {
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  searchResultText: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  searchHint: {
+    fontSize: 14,
+    textAlign: 'center',
+    paddingTop: 40,
+    paddingHorizontal: 30,
   },
   versionText: {
     fontSize: 12,

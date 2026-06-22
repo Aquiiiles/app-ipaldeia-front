@@ -3,6 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
+  ScrollView,
   FlatList,
   TouchableOpacity,
   Modal,
@@ -19,6 +20,14 @@ import Toast from '@/components/Toast';
 
 type TabKey = 'geral' | 'aniversariantes';
 
+const MONTHS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+function formatDateLabel(date: string): string {
+  const [day, month] = date.split('/').map(n => parseInt(n, 10));
+  if (!day || !month || month < 1 || month > 12) return date;
+  return `${day} de ${MONTHS[month - 1]}`;
+}
+
 export default function AgendaScreen() {
   const colors = useThemeColors();
   const { fontSize } = useSettings();
@@ -32,6 +41,7 @@ export default function AgendaScreen() {
   const [formTitle, setFormTitle] = useState('');
   const [formDate, setFormDate] = useState('');
   const [formType, setFormType] = useState<'geral' | 'aniversariante'>('geral');
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' | 'warning' });
@@ -202,14 +212,18 @@ export default function AgendaScreen() {
                 </TouchableOpacity>
               </View>
 
-              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Data (ex: 27/11 ou 10/1)</Text>
-              <TextInput
-                style={[styles.fieldInput, { borderBottomColor: colors.border, color: colors.text }]}
-                value={formDate}
-                onChangeText={setFormDate}
-                placeholder="DD/MM"
-                placeholderTextColor={colors.textSecondary}
-              />
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Data</Text>
+              <TouchableOpacity
+                style={[styles.dateSelector, { borderBottomColor: colors.border }]}
+                onPress={() => setShowDatePicker(true)}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="calendar-outline" size={18} color={colors.primaryDark} />
+                <Text style={[styles.dateSelectorText, { color: formDate ? colors.text : colors.textSecondary }]}>
+                  {formDate ? formatDateLabel(formDate) : 'Selecionar data'}
+                </Text>
+                <Ionicons name="chevron-down" size={16} color={colors.textSecondary} />
+              </TouchableOpacity>
 
               <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>{formType === 'aniversariante' ? 'Nome' : 'Título do evento'}</Text>
               <TextInput
@@ -222,6 +236,72 @@ export default function AgendaScreen() {
 
               <TouchableOpacity style={[styles.saveButton, { backgroundColor: colors.primaryDark }]} onPress={handleSave} disabled={saving} activeOpacity={0.8}>
                 {saving ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.saveButtonText}>SALVAR</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Date Picker */}
+      <Modal visible={showDatePicker} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContainer, { backgroundColor: colors.surface }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Selecionar Data</Text>
+              <TouchableOpacity onPress={() => setShowDatePicker(false)}>
+                <Ionicons name="close" size={24} color={colors.text} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.datePickerContent}>
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary }]}>Mês</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.monthRow}>
+                {MONTHS.map((m, i) => {
+                  const selectedMonth = parseInt(formDate.split('/')[1], 10);
+                  const isActive = selectedMonth === i + 1;
+                  return (
+                    <TouchableOpacity
+                      key={m}
+                      style={[styles.monthChip, { borderColor: colors.border }, isActive && { backgroundColor: colors.primaryDark, borderColor: colors.primaryDark }]}
+                      onPress={() => {
+                        const day = formDate.split('/')[0] || '1';
+                        setFormDate(`${day}/${i + 1}`);
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[styles.monthChipText, { color: colors.text }, isActive && { color: '#FFFFFF' }]}>{m}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+
+              <Text style={[styles.fieldLabel, { color: colors.textSecondary, marginTop: 20 }]}>Dia</Text>
+              <View style={styles.dayGrid}>
+                {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => {
+                  const selectedDay = parseInt(formDate.split('/')[0], 10);
+                  const isActive = selectedDay === d;
+                  return (
+                    <TouchableOpacity
+                      key={d}
+                      style={[styles.dayItem, { backgroundColor: colors.card }, isActive && { backgroundColor: colors.primaryDark }]}
+                      onPress={() => {
+                        const month = formDate.split('/')[1] || String(new Date().getMonth() + 1);
+                        setFormDate(`${d}/${month}`);
+                      }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[styles.dayItemText, { color: colors.text }, isActive && { color: '#FFFFFF' }]}>{d}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              <TouchableOpacity
+                style={[styles.saveButton, { backgroundColor: colors.primaryDark, opacity: formDate ? 1 : 0.5 }]}
+                onPress={() => setShowDatePicker(false)}
+                disabled={!formDate}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.saveButtonText}>CONFIRMAR</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -371,6 +451,52 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     marginBottom: 20,
+  },
+  dateSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderBottomWidth: 1,
+    paddingVertical: 12,
+    marginBottom: 20,
+  },
+  dateSelectorText: {
+    flex: 1,
+    fontSize: 15,
+  },
+  datePickerContent: {
+    padding: 24,
+  },
+  monthRow: {
+    gap: 8,
+    paddingVertical: 4,
+  },
+  monthChip: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  monthChipText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  dayGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 4,
+  },
+  dayItem: {
+    width: 42,
+    height: 42,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dayItemText: {
+    fontSize: 15,
+    fontWeight: '600',
   },
   typeBtn: {
     paddingVertical: 8,

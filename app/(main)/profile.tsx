@@ -15,6 +15,8 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { signOut, updateProfile } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { AppColors } from '@/constants/theme';
@@ -165,21 +167,48 @@ export default function ProfileScreen() {
     });
   }
 
+  async function pickPhotoNative(): Promise<string | null> {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      showToast('Permita o acesso às fotos para alterar o avatar.', 'warning');
+      return null;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (result.canceled || !result.assets?.[0]) return null;
+
+    const manipulated = await ImageManipulator.manipulateAsync(
+      result.assets[0].uri,
+      [{ resize: { width: 256, height: 256 } }],
+      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG, base64: true }
+    );
+    return manipulated.base64 ? `data:image/jpeg;base64,${manipulated.base64}` : null;
+  }
+
   async function handlePickPhoto() {
     const user = auth.currentUser;
     if (!user) return;
 
-    if (Platform.OS !== 'web') {
-      showToast('Disponível apenas na versão web por enquanto.', 'warning');
-      return;
-    }
-
     try {
-      const file = await pickPhotoWeb();
-      if (!file) return;
+      let base64: string | null;
+      if (Platform.OS === 'web') {
+        const file = await pickPhotoWeb();
+        if (!file) return;
+        setUploadingPhoto(true);
+        base64 = await fileToBase64Web(file);
+      } else {
+        const picked = await pickPhotoNative();
+        if (!picked) return;
+        setUploadingPhoto(true);
+        base64 = picked;
+      }
 
-      setUploadingPhoto(true);
-      const base64 = await fileToBase64Web(file);
+      if (!base64) return;
       await setDoc(doc(db, 'usuarios', user.uid), { fotoBase64: base64 }, { merge: true });
       await updateProfile(user, { photoURL: base64 });
       setUserPhoto(base64);

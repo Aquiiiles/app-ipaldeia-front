@@ -17,10 +17,12 @@ import { doc, setDoc } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 
 import { auth, db } from '../../src/services/firebase';
+import { useThemeColors } from '@/src/contexts/SettingsContext';
 import logoIgreja from '../../assets/images_igreja/logo_igreja.jpg';
 import Toast from '@/components/Toast';
 
 export default function RegisterScreen() {
+  const colors = useThemeColors();
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -98,7 +100,7 @@ export default function RegisterScreen() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.flex}
+      style={[styles.flex, { backgroundColor: colors.background }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <Toast
@@ -115,39 +117,39 @@ export default function RegisterScreen() {
         <View style={styles.container}>
           <Image source={logoIgreja} style={styles.logo} resizeMode="contain" />
 
-          <Text style={styles.title}>Criar Conta</Text>
+          <Text style={[styles.title, { color: colors.primaryDark }]}>Criar Conta</Text>
 
           <View style={styles.form}>
-            <View style={styles.inputWrapper}>
-              <Ionicons name="person-outline" size={18} color="#8a8a7a" style={styles.inputIcon} />
+            <View style={[styles.inputWrapper, { borderBottomColor: colors.border }]}>
+              <Ionicons name="person-outline" size={18} color={colors.textSecondary} style={styles.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: colors.text }]}
                 placeholder="Nome completo"
-                placeholderTextColor="#a0a090"
+                placeholderTextColor={colors.textSecondary}
                 autoCapitalize="words"
                 value={name}
                 onChangeText={setName}
               />
             </View>
 
-            <View style={styles.inputWrapper}>
-              <Ionicons name="logo-whatsapp" size={18} color="#8a8a7a" style={styles.inputIcon} />
+            <View style={[styles.inputWrapper, { borderBottomColor: colors.border }]}>
+              <Ionicons name="logo-whatsapp" size={18} color={colors.textSecondary} style={styles.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: colors.text }]}
                 placeholder="WhatsApp (com DDD)"
-                placeholderTextColor="#a0a090"
+                placeholderTextColor={colors.textSecondary}
                 keyboardType="phone-pad"
                 value={phone}
                 onChangeText={handlePhoneChange}
               />
             </View>
 
-            <View style={styles.inputWrapper}>
-              <Ionicons name="mail-outline" size={18} color="#8a8a7a" style={styles.inputIcon} />
+            <View style={[styles.inputWrapper, { borderBottomColor: colors.border }]}>
+              <Ionicons name="mail-outline" size={18} color={colors.textSecondary} style={styles.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: colors.text }]}
                 placeholder="Seu e-mail"
-                placeholderTextColor="#a0a090"
+                placeholderTextColor={colors.textSecondary}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 value={email}
@@ -155,35 +157,35 @@ export default function RegisterScreen() {
               />
             </View>
 
-            <View style={styles.inputWrapper}>
-              <Ionicons name="lock-closed-outline" size={18} color="#8a8a7a" style={styles.inputIcon} />
+            <View style={[styles.inputWrapper, { borderBottomColor: colors.border }]}>
+              <Ionicons name="lock-closed-outline" size={18} color={colors.textSecondary} style={styles.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: colors.text }]}
                 placeholder="Sua senha"
-                placeholderTextColor="#a0a090"
+                placeholderTextColor={colors.textSecondary}
                 secureTextEntry={!showPassword}
                 autoCapitalize="none"
                 value={password}
                 onChangeText={setPassword}
               />
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeButton}>
-                <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color="#8a8a7a" />
+                <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
-            <View style={styles.inputWrapper}>
-              <Ionicons name="lock-closed-outline" size={18} color="#8a8a7a" style={styles.inputIcon} />
+            <View style={[styles.inputWrapper, { borderBottomColor: colors.border }]}>
+              <Ionicons name="lock-closed-outline" size={18} color={colors.textSecondary} style={styles.inputIcon} />
               <TextInput
-                style={styles.input}
+                style={[styles.input, { color: colors.text }]}
                 placeholder="Confirmar senha"
-                placeholderTextColor="#a0a090"
+                placeholderTextColor={colors.textSecondary}
                 secureTextEntry={!showConfirmPassword}
                 autoCapitalize="none"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
               />
               <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeButton}>
-                <Ionicons name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color="#8a8a7a" />
+                <Ionicons name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'} size={18} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
@@ -201,9 +203,9 @@ export default function RegisterScreen() {
             </TouchableOpacity>
 
             <View style={styles.loginLinkContainer}>
-              <Text style={styles.loginLinkText}>Já tem uma conta? </Text>
+              <Text style={[styles.loginLinkText, { color: colors.textSecondary }]}>Já tem uma conta? </Text>
               <TouchableOpacity onPress={() => router.back()}>
-                <Text style={styles.loginLinkAction}>Entrar</Text>
+                <Text style={[styles.loginLinkAction, { color: colors.primaryDark }]}>Entrar</Text>
               </TouchableOpacity>
             </View>
           </View>

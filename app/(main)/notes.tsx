@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,26 +10,16 @@ import {
   FlatList,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppColors } from '@/constants/theme';
 import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
+import { auth } from '@/src/services/firebase';
+import { subscribeNotes, addNote, updateNote, deleteNote, NoteItem } from '@/src/services/firestore';
 import Toast from '@/components/Toast';
-
-const STORAGE_KEY = '@ipaldeia_notes';
-
-type Note = {
-  id: string;
-  pregador: string;
-  texto: string;
-  palavras: string;
-  aplicacoes: string;
-  createdAt: string;
-};
 
 export default function NotesScreen() {
   const colors = useThemeColors();
   const { fontSize } = useSettings();
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [notes, setNotes] = useState<NoteItem[]>([]);
   const [pregador, setPregador] = useState('');
   const [texto, setTexto] = useState('');
   const [palavras, setPalavras] = useState('');
@@ -39,6 +29,8 @@ export default function NotesScreen() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [toast, setToast] = useState({ visible: false, message: '', type: 'success' as 'success' | 'error' | 'warning' });
 
+  const userId = auth.currentUser?.uid || '';
+
   function showToast(message: string, type: 'success' | 'error' | 'warning' = 'success') {
     setToast({ visible: true, message, type });
   }
@@ -47,21 +39,11 @@ export default function NotesScreen() {
     setToast(prev => ({ ...prev, visible: false }));
   }
 
-  const loadNotes = useCallback(async () => {
-    try {
-      const stored = await AsyncStorage.getItem(STORAGE_KEY);
-      if (stored) setNotes(JSON.parse(stored));
-    } catch {}
-  }, []);
-
   useEffect(() => {
-    loadNotes();
-  }, [loadNotes]);
-
-  async function saveToStorage(updated: Note[]) {
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    setNotes(updated);
-  }
+    if (!userId) return;
+    const unsubscribe = subscribeNotes(userId, setNotes);
+    return unsubscribe;
+  }, [userId]);
 
   function clearForm() {
     setPregador('');
@@ -76,7 +58,7 @@ export default function NotesScreen() {
     setShowForm(true);
   }
 
-  function openEditNote(note: Note) {
+  function openEditNote(note: NoteItem) {
     setPregador(note.pregador);
     setTexto(note.texto);
     setPalavras(note.palavras);
@@ -90,29 +72,25 @@ export default function NotesScreen() {
       showToast('Preencha pelo menos um campo.', 'warning');
       return;
     }
+    if (!userId) {
+      showToast('Faça login para salvar anotações.', 'warning');
+      return;
+    }
 
     try {
-      let updated: Note[];
+      const payload = {
+        pregador: pregador.trim(),
+        texto: texto.trim(),
+        palavras: palavras.trim(),
+        aplicacoes: aplicacoes.trim(),
+      };
       if (editingId) {
-        updated = notes.map(n =>
-          n.id === editingId
-            ? { ...n, pregador: pregador.trim(), texto: texto.trim(), palavras: palavras.trim(), aplicacoes: aplicacoes.trim() }
-            : n
-        );
+        await updateNote(editingId, payload);
         showToast('Anotação atualizada!');
       } else {
-        const newNote: Note = {
-          id: Date.now().toString(),
-          pregador: pregador.trim(),
-          texto: texto.trim(),
-          palavras: palavras.trim(),
-          aplicacoes: aplicacoes.trim(),
-          createdAt: new Date().toISOString(),
-        };
-        updated = [newNote, ...notes];
+        await addNote({ ...payload, authorId: userId });
         showToast('Anotação salva!');
       }
-      await saveToStorage(updated);
       setShowForm(false);
       clearForm();
     } catch {
@@ -122,8 +100,7 @@ export default function NotesScreen() {
 
   async function handleDelete(id: string) {
     try {
-      const updated = notes.filter(n => n.id !== id);
-      await saveToStorage(updated);
+      await deleteNote(id);
       setShowDeleteConfirm(null);
       showToast('Anotação excluída.');
     } catch {
@@ -131,8 +108,8 @@ export default function NotesScreen() {
     }
   }
 
-  function formatDate(iso: string) {
-    const d = new Date(iso);
+  function formatDate(timestamp: number) {
+    const d = new Date(timestamp);
     const day = String(d.getDate()).padStart(2, '0');
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const year = d.getFullYear();
