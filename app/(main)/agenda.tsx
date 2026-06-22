@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '@/constants/theme';
 import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
 import { isAdmin } from '@/src/services/admin';
-import { fetchEvents, addEvent, updateEvent, deleteEvent, EventItem } from '@/src/services/firestore';
+import { subscribeEvents, addEvent, updateEvent, deleteEvent, EventItem } from '@/src/services/firestore';
 import Toast from '@/components/Toast';
 
 type TabKey = 'geral' | 'aniversariantes';
@@ -40,21 +40,15 @@ export default function AgendaScreen() {
     setToast({ visible: true, message, type });
   }
 
-  const loadEvents = useCallback(async () => {
-    try {
-      const data = await fetchEvents();
-      setEvents(data);
-    } catch {}
-    finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
-
   useEffect(() => {
     setAdmin(isAdmin());
-    loadEvents();
-  }, [loadEvents]);
+    const unsubscribe = subscribeEvents((data) => {
+      setEvents(data);
+      setLoading(false);
+      setRefreshing(false);
+    });
+    return unsubscribe;
+  }, []);
 
   const filteredEvents = events.filter(e =>
     activeTab === 'geral' ? e.type === 'geral' : e.type === 'aniversariante'
@@ -92,7 +86,6 @@ export default function AgendaScreen() {
         showToast('Evento criado!');
       }
       setShowForm(false);
-      loadEvents();
     } catch {
       showToast('Erro ao salvar.', 'error');
     } finally {
@@ -105,7 +98,6 @@ export default function AgendaScreen() {
       await deleteEvent(id);
       setShowDeleteConfirm(null);
       showToast('Evento excluído.');
-      loadEvents();
     } catch {
       showToast('Erro ao excluir.', 'error');
     }
@@ -176,7 +168,7 @@ export default function AgendaScreen() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); loadEvents(); }} tintColor="#FFFFFF" />
+            <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); setTimeout(() => setRefreshing(false), 1000); }} tintColor="#FFFFFF" />
           }
         />
       )}
