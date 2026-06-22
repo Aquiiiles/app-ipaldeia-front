@@ -33,6 +33,12 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    // Hymns — anyone reads, admins write
+    match /hinos/{docId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
     // Prayers — anyone reads/creates, author deletes, anyone updates prayedBy
     match /oracoes/{docId} {
       allow read: if isSignedIn();

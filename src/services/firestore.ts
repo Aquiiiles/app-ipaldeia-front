@@ -161,3 +161,34 @@ export async function togglePrayed(prayerId: string, userId: string, currentList
 export async function deletePrayer(id: string): Promise<void> {
   await deleteDoc(doc(db, 'oracoes', id));
 }
+
+// --- Hymns ---
+
+export type HymnItem = {
+  id: string;
+  number: number;
+  title: string;
+  lyrics: string;
+  book: 'hinario' | 'salterio';
+  createdAt: number;
+};
+
+export function subscribeHymns(book: 'hinario' | 'salterio', callback: (items: HymnItem[]) => void): Unsubscribe {
+  const q = query(collection(db, 'hinos'), orderBy('number', 'asc'));
+  return onSnapshot(q, (snapshot) => {
+    const all = snapshot.docs.map(d => ({ id: d.id, ...d.data() })) as HymnItem[];
+    callback(all.filter(h => h.book === book));
+  });
+}
+
+export async function addHymn(data: Omit<HymnItem, 'id' | 'createdAt'>): Promise<string> {
+  const ref = await addDoc(collection(db, 'hinos'), {
+    ...data,
+    createdAt: Date.now(),
+  });
+  return ref.id;
+}
+
+export async function deleteHymn(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'hinos', id));
+}
