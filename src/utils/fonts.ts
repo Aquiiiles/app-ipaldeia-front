@@ -34,12 +34,20 @@ function patchComponent(Component: any) {
 
   Component.render = function patchedRender(props: any, ref: any) {
     const element = originalRender.call(this, props, ref);
-    const flattened = StyleSheet.flatten(element.props.style) as TextStyle | undefined;
-    const weight = flattened?.fontWeight != null ? String(flattened.fontWeight) : '400';
-    const family = flattened?.fontFamily ?? FONT_BY_WEIGHT[weight] ?? FONT_BY_WEIGHT['400'];
+    // Be defensive: the base render can return null/non-element in some cases
+    // (e.g. nested text). Never let font styling throw and blank the screen.
+    try {
+      if (!element || !React.isValidElement(element)) return element;
+      const existingStyle = (element.props as any)?.style;
+      const flattened = StyleSheet.flatten(existingStyle) as TextStyle | undefined;
+      const weight = flattened?.fontWeight != null ? String(flattened.fontWeight) : '400';
+      const family = flattened?.fontFamily ?? FONT_BY_WEIGHT[weight] ?? FONT_BY_WEIGHT['400'];
 
-    return React.cloneElement(element, {
-      style: [{ fontFamily: family }, element.props.style],
-    });
+      return React.cloneElement(element, {
+        style: [{ fontFamily: family }, existingStyle],
+      });
+    } catch {
+      return element;
+    }
   };
 }
