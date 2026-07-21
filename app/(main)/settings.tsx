@@ -93,7 +93,7 @@ export default function SettingsScreen() {
       </View>
 
       <Text style={[styles.footer, { color: colors.textSecondary }]}>
-        Desenvolvido com carinho para a IP Aldeia
+        Desenvolvido com carinho por Aquiles para a IP Aldeia
       </Text>
     </ScrollView>
   );
