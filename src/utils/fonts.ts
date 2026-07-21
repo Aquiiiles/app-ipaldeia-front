@@ -1,4 +1,3 @@
-import React from 'react';
 import { Text as RNText, TextInput as RNTextInput, StyleSheet, type TextStyle } from 'react-native';
 
 // Maps a fontWeight value to the matching Poppins variant so the whole app uses
@@ -28,26 +27,24 @@ export function enableGlobalPoppins() {
   patchComponent(RNTextInput as any);
 }
 
+// We inject the font into the INPUT props before the component renders, instead
+// of cloning the render OUTPUT. Cloning the output breaks nested <Text> (e.g. the
+// Bible verse list) because it produces an element the reconciler can't commit,
+// blanking the screen. Injecting into props keeps the element tree normal.
 function patchComponent(Component: any) {
   const originalRender = Component.render;
   if (typeof originalRender !== 'function') return;
 
   Component.render = function patchedRender(props: any, ref: any) {
-    const element = originalRender.call(this, props, ref);
-    // Be defensive: the base render can return null/non-element in some cases
-    // (e.g. nested text). Never let font styling throw and blank the screen.
     try {
-      if (!element || !React.isValidElement(element)) return element;
-      const existingStyle = (element.props as any)?.style;
-      const flattened = StyleSheet.flatten(existingStyle) as TextStyle | undefined;
+      const flattened = StyleSheet.flatten(props?.style) as TextStyle | undefined;
       const weight = flattened?.fontWeight != null ? String(flattened.fontWeight) : '400';
       const family = flattened?.fontFamily ?? FONT_BY_WEIGHT[weight] ?? FONT_BY_WEIGHT['400'];
-
-      return React.cloneElement(element, {
-        style: [{ fontFamily: family }, existingStyle],
-      });
+      const patchedProps = { ...props, style: [{ fontFamily: family }, props?.style] };
+      return originalRender.call(this, patchedProps, ref);
     } catch {
-      return element;
+      // If anything goes wrong, render normally so text never disappears.
+      return originalRender.call(this, props, ref);
     }
   };
 }
