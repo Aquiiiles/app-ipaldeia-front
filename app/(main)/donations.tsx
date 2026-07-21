@@ -11,7 +11,7 @@ import { AppColors } from '@/constants/theme';
 import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
 import { useState } from 'react';
 
-const PIX_KEY = '12.345.678/0001-90';
+const PIX_KEY = '43.504.136/0001-41';
 
 export default function DonationsScreen() {
   const colors = useThemeColors();
@@ -43,20 +43,24 @@ export default function DonationsScreen() {
         <Text style={[styles.cardTitle, { color: colors.text }]}>Dados bancários:</Text>
 
         <View style={styles.row}>
+          <Text style={[styles.rowLabel, { color: colors.text }]}>Favorecido:</Text>
+          <Text style={[styles.rowValue, { color: colors.textSecondary, fontSize }]}>Igreja Presbiteriana de Aldeia</Text>
+        </View>
+        <View style={styles.row}>
           <Text style={[styles.rowLabel, { color: colors.text }]}>Banco:</Text>
           <Text style={[styles.rowValue, { color: colors.textSecondary, fontSize }]}>Banco do Brasil</Text>
         </View>
         <View style={styles.row}>
           <Text style={[styles.rowLabel, { color: colors.text }]}>Agência:</Text>
-          <Text style={[styles.rowValue, { color: colors.textSecondary, fontSize }]}>1234-5</Text>
+          <Text style={[styles.rowValue, { color: colors.textSecondary, fontSize }]}>1138</Text>
         </View>
         <View style={styles.row}>
           <Text style={[styles.rowLabel, { color: colors.text }]}>Conta:</Text>
-          <Text style={[styles.rowValue, { color: colors.textSecondary, fontSize }]}>12345-6</Text>
+          <Text style={[styles.rowValue, { color: colors.textSecondary, fontSize }]}>44665-3 (corrente)</Text>
         </View>
         <View style={styles.row}>
-          <Text style={[styles.rowLabel, { color: colors.text }]}>CNPJ:</Text>
-          <Text style={[styles.rowValue, { color: colors.textSecondary, fontSize }]}>12.345.678/0001-90</Text>
+          <Text style={[styles.rowLabel, { color: colors.text }]}>Chave PIX:</Text>
+          <Text style={[styles.rowValue, { color: colors.textSecondary, fontSize }]}>CNPJ 43.504.136/0001-41</Text>
         </View>
       </View>
 
@@ -119,7 +123,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: 'rgba(255,255,255,0.8)',
-    width: 80,
+    width: 96,
   },
   rowValue: {
     fontSize: 14,
