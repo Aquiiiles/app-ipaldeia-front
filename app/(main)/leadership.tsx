@@ -22,7 +22,6 @@ const SECTIONS: Section[] = [
     color: '#5B7F5E',
     leaders: [
       { name: 'Relrison Silva', role: 'Reverendo' },
-      { name: 'Doug Leaman', role: 'Reverendo' },
     ],
   },
   {
@@ -101,7 +100,7 @@ export default function LeadershipScreen() {
       <View style={styles.footer}>
         <Ionicons name="heart" size={16} color={colors.textSecondary} />
         <Text style={[styles.footerText, { color: colors.textSecondary }]}>
-          "Apascentai o rebanho de Deus" — 1 Pedro 5:2
+          “Apascentai o rebanho de Deus” — 1 Pedro 5:2
         </Text>
       </View>
     </ScrollView>
