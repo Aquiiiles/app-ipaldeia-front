@@ -7,6 +7,7 @@ import {
   Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { router, type Href } from 'expo-router';
 import { AppColors } from '@/constants/theme';
 import { useThemeColors, useSettings } from '@/src/contexts/SettingsContext';
 
@@ -16,7 +17,10 @@ type Document = {
   title: string;
   subtitle: string;
   icon: IoniconsName;
-  url: string;
+  /** PDF ou site de terceiros, aberto no navegador. */
+  url?: string;
+  /** Conteúdo que hospedamos no próprio app. */
+  route?: Href;
 };
 
 const DOCUMENTS: Document[] = [
@@ -52,9 +56,9 @@ const DOCUMENTS: Document[] = [
   },
   {
     title: 'Credo Niceno',
-    subtitle: 'Declaração de fé cristã (325 d.C.)',
+    subtitle: 'A versão confessada em nossos cultos',
     icon: 'shield-checkmark-outline',
-    url: 'https://praylingo.com/nicene-creed/portuguese/',
+    route: '/(main)/creed',
   },
 ];
 
@@ -63,7 +67,11 @@ export default function DocumentsScreen() {
   const { fontSize } = useSettings();
 
   function handlePress(doc: Document) {
-    Linking.openURL(doc.url);
+    if (doc.route) {
+      router.push(doc.route);
+      return;
+    }
+    if (doc.url) Linking.openURL(doc.url);
   }
 
   return (
@@ -86,7 +94,11 @@ export default function DocumentsScreen() {
             <Text style={[styles.cardTitle, { color: colors.text, fontSize }]}>{doc.title}</Text>
             <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>{doc.subtitle}</Text>
           </View>
-          <Ionicons name="open-outline" size={16} color={colors.textSecondary} />
+          <Ionicons
+            name={doc.route ? 'chevron-forward' : 'open-outline'}
+            size={16}
+            color={colors.textSecondary}
+          />
         </TouchableOpacity>
       ))}
     </ScrollView>

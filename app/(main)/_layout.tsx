@@ -23,6 +23,7 @@ export default function MainLayout() {
       <Stack.Screen name="prayers" options={{ title: 'Orações' }} />
       <Stack.Screen name="donations" options={{ title: 'Doações' }} />
       <Stack.Screen name="documents" options={{ title: 'Documentos' }} />
+      <Stack.Screen name="creed" options={{ title: 'Credo Niceno' }} />
       <Stack.Screen name="leadership" options={{ title: 'Liderança' }} />
       <Stack.Screen name="profile" options={{ title: 'Perfil' }} />
       <Stack.Screen name="settings" options={{ title: 'Configurações' }} />
