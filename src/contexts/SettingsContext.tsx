@@ -26,12 +26,15 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((raw) => {
-      if (raw) {
-        try { setSettings({ ...defaults, ...JSON.parse(raw) }); } catch {}
-      }
-      setLoaded(true);
-    });
+    AsyncStorage.getItem(STORAGE_KEY)
+      .then((raw) => {
+        if (raw) {
+          try { setSettings({ ...defaults, ...JSON.parse(raw) }); } catch {}
+        }
+      })
+      // Never leave the app stuck on a blank screen if the storage read fails —
+      // mark as loaded regardless so the UI renders with default settings.
+      .finally(() => setLoaded(true));
   }, []);
 
   function persist(next: Settings) {

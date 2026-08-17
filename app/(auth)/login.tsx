@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,13 +12,44 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { router } from 'expo-router';
-import { signInWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup } from 'firebase/auth';
+import Constants from 'expo-constants';
+import * as WebBrowser from 'expo-web-browser';
+import * as Google from 'expo-auth-session/providers/google';
+import {
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  signInWithPopup,
+  signInWithCredential,
+  GoogleAuthProvider,
+} from 'firebase/auth';
 import { Ionicons } from '@expo/vector-icons';
 
 import { auth, googleProvider } from '../../src/services/firebase';
 import { useThemeColors } from '@/src/contexts/SettingsContext';
 import logoIgreja from '../../assets/images_igreja/logo_igreja.jpg';
 import Toast from '@/components/Toast';
+
+// Required for expo-auth-session to dismiss the in-app browser and hand the
+// OAuth result back to the app when it reopens (native only; no-op on web).
+WebBrowser.maybeCompleteAuthSession();
+
+// OAuth client IDs live in app.json → expo.extra.googleAuth. Fill them with the
+// IDs created in Google Cloud Console (Android + Web at minimum). If they are
+// blank the native Google button falls back to a helpful message instead of
+// crashing.
+const rawGoogleAuth = (Constants.expoConfig?.extra?.googleAuth ?? {}) as {
+  androidClientId?: string;
+  iosClientId?: string;
+  webClientId?: string;
+};
+// Treat blank strings as "not provided" so expo-auth-session takes its
+// unconfigured path (null request) instead of trying to build an OAuth request
+// with an empty client id.
+const googleAuth = {
+  androidClientId: rawGoogleAuth.androidClientId || undefined,
+  iosClientId: rawGoogleAuth.iosClientId || undefined,
+  webClientId: rawGoogleAuth.webClientId || undefined,
+};
 
 export default function LoginScreen() {
   const colors = useThemeColors();
@@ -28,6 +59,44 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [toast, setToast] = useState({ visible: false, message: '', type: 'error' as 'success' | 'error' | 'warning' });
+
+  // Native Google sign-in via OAuth (expo-auth-session). `promptAsync` opens the
+  // system browser; the result arrives asynchronously in the effect below. Web
+  // keeps using signInWithPopup (see handleGoogleLogin).
+  const [, googleResponse, promptGoogleAsync] = Google.useAuthRequest({
+    androidClientId: googleAuth.androidClientId,
+    iosClientId: googleAuth.iosClientId,
+    webClientId: googleAuth.webClientId,
+  });
+
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    if (!googleResponse) return;
+
+    if (googleResponse.type === 'success') {
+      const idToken = googleResponse.params?.id_token;
+      if (!idToken) {
+        setGoogleLoading(false);
+        showToast('Não foi possível obter o token do Google.', 'error');
+        return;
+      }
+      const credential = GoogleAuthProvider.credential(idToken);
+      signInWithCredential(auth, credential)
+        .then(() => router.replace('/(main)'))
+        .catch((error: any) => {
+          console.log('Google credential error:', error.code, error.message);
+          showToast(`Erro ao fazer login com Google. (${error.code || 'unknown'})`, 'error');
+        })
+        .finally(() => setGoogleLoading(false));
+    } else if (googleResponse.type === 'error') {
+      console.log('Google auth error:', googleResponse.error);
+      showToast('Erro ao autenticar com o Google.', 'error');
+      setGoogleLoading(false);
+    } else {
+      // 'dismiss' / 'cancel' — user closed the browser, just reset the button.
+      setGoogleLoading(false);
+    }
+  }, [googleResponse]);
 
   function showToast(message: string, type: 'success' | 'error' | 'warning' = 'error') {
     setToast({ visible: true, message, type });
@@ -95,11 +164,24 @@ export default function LoginScreen() {
   }
 
   async function handleGoogleLogin() {
+    // Native (Android/iOS): OAuth via the system browser. The result is handled
+    // by the effect watching `googleResponse`.
     if (Platform.OS !== 'web') {
-      showToast('Login com Google disponível apenas na versão web por enquanto.', 'warning');
+      if (!googleAuth.androidClientId && !googleAuth.iosClientId) {
+        showToast('Login com Google ainda não configurado nesta versão.', 'warning');
+        return;
+      }
+      setGoogleLoading(true);
+      const result = await promptGoogleAsync();
+      // If the browser could not even open, reset here (success/cancel are
+      // handled in the effect once the redirect comes back).
+      if (result?.type !== 'success') {
+        setGoogleLoading(false);
+      }
       return;
     }
 
+    // Web: popup flow (works only in the browser).
     setGoogleLoading(true);
     try {
       await signInWithPopup(auth, googleProvider);

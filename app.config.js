@@ -1,5 +1,3 @@
-import { ExpoConfig, ConfigContext } from 'expo/config';
-
 /**
  * Dynamic layer on top of app.json.
  *
@@ -10,8 +8,11 @@ import { ExpoConfig, ConfigContext } from 'expo/config';
  * baseUrl '/app-ipaldeia-front' is only needed for the GitHub Pages web
  * deployment. On native the prefix breaks routing, so it has to come out.
  * EAS_BUILD_PLATFORM is set during EAS builds; EXPO_OS during local dev.
+ *
+ * NOTE: kept as plain JS (not .ts) on purpose — eas-cli's bundled config
+ * reader chokes transpiling app.config.ts, so avoid TypeScript here.
  */
-export default ({ config }: ConfigContext): ExpoConfig => {
+module.exports = ({ config }) => {
   const isNativeBuild =
     ['android', 'ios'].includes(process.env.EAS_BUILD_PLATFORM ?? '') ||
     ['android', 'ios'].includes(process.env.EXPO_OS ?? '');
