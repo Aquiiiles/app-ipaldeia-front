@@ -15,10 +15,9 @@
     "android": {
       "package": "com.ipaldeia.app",
       "adaptiveIcon": {
-        "backgroundColor": "#3C4A3E",
+        "backgroundColor": "#A3AC9A",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundImage": "./assets/images/android-icon-background.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
