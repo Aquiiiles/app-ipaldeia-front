@@ -1,0 +1,8 @@
+-r requirements.txt
+
+# Optional: LLM providers (only needed for cover letters / narrative analysis)
+anthropic==0.42.0
+openai==1.59.7
+
+# Optional: browser assist (never bypasses CAPTCHA; opens a headed browser you control)
+playwright==1.49.1

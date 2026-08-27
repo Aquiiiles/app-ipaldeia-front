@@ -1,0 +1,160 @@
+# ============================================================
+#  PERFIL PROFISSIONAL  —  copie para config/profile.yaml
+#  Este arquivo e a UNICA fonte de verdade sobre voce.
+#  O agente NUNCA inventa nada que nao esteja aqui (ou no CV lido).
+# ============================================================
+
+identity:
+  full_name: "Seu Nome Completo"
+  email: "seu.email@exemplo.com"
+  phone: ""
+  linkedin: ""
+  github: ""
+  location: "Brasil"
+  timezone: "America/Sao_Paulo"
+  # Nacionalidade / autorizacao de trabalho — usado para responder perguntas
+  # de candidatura sem chutar.
+  work_authorization: "Brasil (CLT/PJ). Sem visto para EUA/UE."
+  languages:
+    - language: "Portugues"
+      level: "Nativo"
+    - language: "Ingles"
+      level: ""          # PREENCHA. Vazio => o agente pedira confirmacao.
+
+current:
+  title: "Associate Software Engineer"
+  company: "Liferay"
+  # Salario bruto mensal em BRL. Usado apenas localmente para comparar ofertas.
+  salary_brl_month: 5000
+  currency: "BRL"
+
+experience:
+  # Anos totais de experiencia profissional.
+  total_years: 2.0
+  # Anos por tecnologia. Base para responder "how many years of X?".
+  # Só declare aqui o que for verdade.
+  years_by_technology:
+    java: 2.0
+    liferay: 2.0
+    gradle: 2.0
+    docker: 1.5
+    elasticsearch: 1.5
+    sql: 1.5
+    git: 2.0
+    javascript: 1.0
+
+  # Tecnologias que voce domina / usou profissionalmente.
+  technologies:
+    - java
+    - liferay
+    - gradle
+    - docker
+    - elasticsearch
+    - sql
+    - git
+    - debugging
+    - code review
+    - legacy code
+    - migrations
+    - upgrades
+
+  highlights:
+    - "Upgrades e migracoes de versao em sistemas grandes e codigo legado."
+    - "Debugging e investigacao de root cause em ambiente corporativo."
+    - "Investigacao de problemas de indexacao/reindexacao com Elasticsearch."
+    - "Fluxo com tickets, code review e desenvolvimento em time."
+
+education: []      # preenchido tambem pela leitura do CV
+certifications: []
+projects: []
+
+# ------------------------------------------------------------
+#  O QUE VOCE QUER
+# ------------------------------------------------------------
+preferences:
+  area: "Software Engineering / Backend"
+  # Niveis desejados (usado no score de nivel).
+  target_levels: ["associate", "junior", "mid"]
+  # Niveis NAO desejados (reduzem drasticamente a prioridade).
+  avoid_levels: ["senior", "staff", "principal", "lead", "tech lead", "manager", "director"]
+  remote_only: true
+  accepted_modalities: ["remote"]        # remote | hybrid | onsite
+  # Regioes/paises aceitos para contratacao.
+  accepted_regions: ["brazil", "brasil", "latam", "latin america", "south america", "remote", "worldwide", "anywhere"]
+  languages_for_jobs: ["pt", "en"]
+  # Salario alvo bruto mensal em BRL (usado no score de compensacao).
+  target_salary_brl_month: 8000
+  minimum_salary_brl_month: 6000
+  # Cargos que interessam (usado para montar as queries de busca).
+  desired_titles:
+    - "backend engineer"
+    - "backend developer"
+    - "java developer"
+    - "software engineer"
+    - "desenvolvedor backend"
+    - "desenvolvedor java"
+
+# ------------------------------------------------------------
+#  OBJETIVOS DE CARREIRA
+#  Tecnologias que voce QUER aprender. Nao sao exigidas de voce:
+#  aumentam o "potencial de crescimento" da vaga.
+# ------------------------------------------------------------
+career_goals:
+  narrative: >
+    Sair gradualmente de uma especializacao excessiva em Liferay e construir
+    uma carreira mais ampla como Software Engineer backend, com maior exposicao
+    a Spring, sistemas distribuidos, cloud e observabilidade. Aumentar o salario.
+  growth_technologies:
+    - spring
+    - spring boot
+    - rest api
+    - postgresql
+    - microservices
+    - distributed systems
+    - kubernetes
+    - aws
+    - azure
+    - gcp
+    - kafka
+    - messaging
+    - redis
+    - observability
+    - automated testing
+    - software architecture
+    - ci/cd
+    - terraform
+
+# ------------------------------------------------------------
+#  RECENCIA  (dias desde a publicacao)
+# ------------------------------------------------------------
+recency:
+  excellent_max_days: 7
+  good_max_days: 14
+  acceptable_max_days: 30
+  deprioritize_after_days: 30
+  ignore_after_days: 60
+  # Se a data de publicacao for desconhecida, tratar como esta faixa:
+  unknown_treated_as: "acceptable"   # excellent | good | acceptable | low
+
+# ------------------------------------------------------------
+#  PESOS DO FIT SCORE  (soma = 100)
+# ------------------------------------------------------------
+scoring:
+  weights:
+    experience_match: 25
+    tech_stack: 25
+    job_level: 20
+    modality_location: 10
+    seniority_required: 10
+    growth_potential: 5
+    compensation: 5
+  thresholds:
+    excellent: 90
+    very_good: 80
+    good: 70
+    stretch: 60
+  # Quantos anos ACIMA da sua experiencia ainda vale mostrar como "stretch".
+  stretch_years_tolerance: 3
+  # Nunca descarta silenciosamente: vagas abaixo do corte ficam como
+  # NAO PRIORITARIA, visiveis no dashboard com filtro.
+  hard_reject_below: 25

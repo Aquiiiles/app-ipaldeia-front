@@ -1,0 +1,83 @@
+# ============================================================
+#  FONTES DE VAGAS  —  copie para config/sources.yaml
+#
+#  POLITICA: somente APIs publicas/oficiais e feeds autorizados.
+#  Sites cujos Termos de Uso proibem scraping (LinkedIn, Indeed,
+#  Glassdoor, Gupy, Vagas.com) NAO sao raspados. Para eles o agente
+#  gera links de busca para voce abrir manualmente, e oferece um
+#  importador manual (cole a URL/texto da vaga).
+# ============================================================
+
+defaults:
+  min_seconds_between_requests: 2.0
+  max_pages: 3
+
+sources:
+
+  # ---------- Job boards remotos com API publica ----------
+  - id: remotive
+    type: api
+    enabled: true
+    # API JSON publica e gratuita: https://remotive.com/api/remote-jobs
+    queries: ["java", "backend", "software engineer"]
+
+  - id: remoteok
+    type: api
+    enabled: true
+    # https://remoteok.com/api — publica; exige User-Agent e atribuicao.
+    queries: ["java", "backend"]
+
+  - id: arbeitnow
+    type: api
+    enabled: true
+    # https://www.arbeitnow.com/api/job-board-api — publica.
+    queries: ["java", "backend"]
+
+  - id: himalayas
+    type: api
+    enabled: true
+    # https://himalayas.app/jobs/api — publica.
+    queries: ["java", "backend"]
+
+  - id: weworkremotely
+    type: rss
+    enabled: true
+    # Feeds RSS oficiais.
+    feeds:
+      - "https://weworkremotely.com/categories/remote-back-end-programming-jobs.rss"
+      - "https://weworkremotely.com/categories/remote-full-stack-programming-jobs.rss"
+
+  # ---------- ATS: APIs oficiais de job board, por empresa ----------
+  # Adicione o "board token" das empresas que te interessam.
+  # Como descobrir: a pagina de vagas da empresa costuma ser
+  #   https://boards.greenhouse.io/<token>   ou   https://jobs.lever.co/<company>
+  - id: greenhouse
+    type: ats
+    enabled: true
+    companies: []          # ex.: ["nubank", "stone", "gympass"]
+
+  - id: lever
+    type: ats
+    enabled: true
+    companies: []          # ex.: ["loft", "quintoandar"]
+
+  - id: ashby
+    type: ats
+    enabled: true
+    companies: []          # ex.: ["ramp"]
+
+  # ---------- Fontes que NAO sao raspadas (compliance) ----------
+  # O agente apenas monta a URL de busca para voce abrir no navegador.
+  - id: manual_search_links
+    type: link_builder
+    enabled: true
+    targets:
+      - name: "LinkedIn Jobs"
+        url_template: "https://www.linkedin.com/jobs/search/?keywords={query}&location=Brazil&f_WT=2&f_TPR=r604800&sortBy=DD"
+        note: "Termos de Uso proibem scraping. Abra manualmente."
+      - name: "Indeed Brasil"
+        url_template: "https://br.indeed.com/jobs?q={query}&sc=0kf%3Aattr%28DSQF7%29%3B&fromage=7&sort=date"
+        note: "Termos de Uso proibem scraping. Abra manualmente."
+      - name: "Gupy"
+        url_template: "https://portal.gupy.io/job-search/term={query}?workplaceTypes[]=remote"
+        note: "Sem API publica. Abra manualmente."
