@@ -33,4 +33,15 @@ jobs:
 
       - run: npx tsc --noEmit
 
-      - run: eas build --platform android --profile ${{ inputs.profile }} --non-interactive --no-wait
+      - name: EAS build
+        run: |
+          eas build --platform android --profile ${{ inputs.profile }} --non-interactive --wait --json > build.json
+          url=$(jq -r '.[0].artifacts.buildUrl' build.json)
+          echo "Build: $url"
+          mkdir -p out
+          curl -sSL -o "out/ip-aldeia-${{ inputs.profile }}.${url##*.}" "$url"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-${{ inputs.profile }}
+          path: out/
